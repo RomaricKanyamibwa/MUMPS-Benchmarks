@@ -82,7 +82,7 @@ def main():
    t_ini = time.time()
    to_install_ordered=['hdf5', 'med',
                    'gmsh',
-                   'grace', 'scotch',
+                   'grace', 'scotch','ptscotch',
                    'astk', 'metis', 'tfel',
                    'mumps',
                    'homard',
@@ -680,6 +680,10 @@ def main():
    if not opts.ign_err and 'scotch' in to_install \
       and (not cfg.get('FLEX') or not cfg.get('RANLIB') or not cfg.get('YACC')):
       to_install.remove('scotch')
+
+   if not opts.ign_err and 'ptscotch' in to_install \
+      and (not cfg.get('FLEX') or not cfg.get('RANLIB') or not cfg.get('YACC')):
+      to_install.remove('ptscotch')
 
    # 1.4.8. ----- check for utilities (for tfel)
    ftools.find_and_set(cfg, 'CMAKE', 'cmake', err=False)

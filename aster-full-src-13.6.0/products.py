@@ -564,7 +564,94 @@ def setup_scotch(dep, summary, **kargs):
          # only if version >= 6
          version.startswith('5') and (None, None) or \
              ('Make',      {
-                'command': 'make esmumps',
+                'command': 'make scotch',
+                'path'   : osp.join('__setup.workdir__', '__setup.content__', 'src'),
+                'nbcpu'  : 1, # seems not support "-j NBCPU" option
+             }),
+         ('Install',   {'command' : 'make install prefix=%s' % cfg['HOME_SCOTCH'],
+                        'path'    : osp.join('__setup.workdir__', '__setup.content__', 'src') }),
+         ('Clean',     {}),
+      ),
+
+      installdir  = cfg['HOME_SCOTCH'],
+      sourcedir   = cfg['SOURCEDIR'],
+   )
+   return setup
+
+#-------------------------------------------------------------------------------
+# 43.2 ----- ptscotch
+def setup_ptscotch(dep, summary, **kargs):
+   cfg=dep.cfg
+   product='scotch'
+   version = dict_prod[product]
+   pkg_name = '%s-%s' % (product, version)
+   # ----- add (and check) product dependencies
+   dep.Add(product,
+      req=['ASTER_ROOT', 'FLEX', 'RANLIB', 'YACC'],
+      set=['HOME_SCOTCH',],
+   )
+   cfg['HOME_SCOTCH']=osp.join(cfg['ASTER_ROOT'], 'public', pkg_name)
+
+   scotch_cfg = {}.fromkeys(['CC', 'CFLAGS', 'FLEX', 'RANLIB', 'YACC'], '')
+   scotch_cfg.update(cfg)
+   if cfg['PLATFORM'] != 'darwin':
+      scotch_cfg['CFLAGS'] += ' -Wl,--no-as-needed'
+   else:
+      # OS X linker does not support '--no-as-needed'
+      # plus it does not provide some *NIX clock timing and we must use an old timing method in Scotch (as used in Make.inc/Makefile.inc.i686_mac_darwin10)
+      scotch_cfg['CFLAGS'] += ' -DCOMMON_TIMING_OLD -DCOMMON_PTHREAD_BARRIER'
+
+
+   # ----- setup instance
+   setup=SETUP(
+      product=product,
+      version=version,
+      description="""Static mapping, graph partitioning, and sparse matrix block ordering package.""",
+      depend=dep,
+      system=kargs['system'],
+      log=kargs['log'],
+      reinstall=kargs['reinstall'],
+
+      actions=(
+         ('IsInstalled', { 'filename' :
+             [osp.join('__setup.installdir__', 'lib', 'libptesmumps.a'),
+              osp.join('__setup.installdir__', 'lib', 'libesmumps.a'),
+              osp.join('__setup.installdir__', 'lib', 'libscotch.a'),
+              osp.join('__setup.installdir__', 'lib', 'libptscotch.a'),
+              osp.join('__setup.installdir__', 'lib', 'libptscotcherr.a'),
+              osp.join('__setup.installdir__', 'lib', 'libscotcherrexit.a'),
+              osp.join('__setup.installdir__', 'lib', 'libptscotcherrexit.a'),
+              osp.join('__setup.installdir__', 'lib', 'libscotchmetis.a'),
+              osp.join('__setup.installdir__', 'lib', 'libptscotchparmetis.a'),
+              osp.join('__setup.installdir__', 'include', 'scotchf.h'),
+              osp.join('__setup.installdir__', 'include', 'ptscotchf.h'),
+              osp.join('__setup.installdir__', 'include', 'scotch.h'),
+              osp.join('__setup.installdir__', 'include', 'ptscotch.h') ]
+         } ),
+         ('Extract',   {}),
+         ('Configure', {
+            'command': 'mv src/Makefile.inc src/Makefile.inc.orig ; '
+                       'cp src/Makefile.aster_full src/Makefile.inc',
+         }),
+         ('ChgFiles',  {
+            'files'     : [osp.join('src', 'Makefile.inc'), ],
+            'dtrans'    : scotch_cfg,
+         }),
+         # remove librt on darwin
+         cfg['PLATFORM'] != 'darwin' and (None, None) or \
+            ('ChgFiles',  {
+               'files'     : [osp.join('src', 'Makefile.inc'), ],
+               'delimiter' : '',
+               'dtrans'    : { re.escape('-lrt'): ''},
+            }),
+         ('Make',      {
+            'path'   : osp.join('__setup.workdir__', '__setup.content__', 'src'),
+            'nbcpu'  : 1, # seems not support "-j NBCPU" option
+         }),
+         # only if version >= 6
+         version.startswith('5') and (None, None) or \
+             ('Make',      {
+                'command': 'make ptscotch; make ptesmumps',
                 'path'   : osp.join('__setup.workdir__', '__setup.content__', 'src'),
                 'nbcpu'  : 1, # seems not support "-j NBCPU" option
              }),
