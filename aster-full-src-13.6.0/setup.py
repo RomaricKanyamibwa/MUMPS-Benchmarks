@@ -80,13 +80,7 @@ def main():
    #-------------------------------------------------------------------------------
    # 0.1. ----- list of products to install (could be skip through cfg)
    t_ini = time.time()
-   to_install_ordered=['hdf5', 'med',
-                   'gmsh',
-                   'grace', 'scotch','ptscotch',
-                   'astk', 'metis', 'tfel',
-                   'mumps',
-                   'homard',
-                   'aster']
+   to_install_ordered=['scotch','ptscotch','metis','mumps']
    to_install = [prod for prod in to_install_ordered if prod in available_products]
 
    __aster_version__ = short_version
@@ -94,15 +88,15 @@ def main():
    # 0.2. ----- version
    import __pkginfo__
 
-   svers = os.linesep.join(['Code_Aster Setup version ' + \
+   svers = os.linesep.join(['MUMPS Benchmarks Setup version ' + \
                            __pkginfo__.version + '-' + __pkginfo__.release, __pkginfo__.copyright])
 
    usage="usage: python %prog [options] [install|test] [arg]\n" + \
    _("""
 
-   Setup script for Code_Aster distribution.
+   Setup script for MUMPS Benchmarks distribution.
 
-   NOTE : Code_Aster or eventually other products will be configured with
+   NOTE : MUMPS Benchmarks or eventually other products will be configured with
           the Python you use to run this setup :
             interpreter    : %(interp)s (version %(vers)s)
             prefix         : %(prefix)s
@@ -134,12 +128,12 @@ def main():
    # 0.3. ----- command line parser
    parser = OptionParser(
          usage=usage,
-         version='Code_Aster Setup version ' + __pkginfo__.version + '-' + __pkginfo__.release)
+         version='MUMPS Benchmarks Setup version ' + __pkginfo__.version + '-' + __pkginfo__.release)
    parser.add_option("--prefix", dest="prefix", action='store',
-         help=_("define toplevel directory for Code_Aster (identical to --aster_root)"), metavar="DIR")
+         help=_("define toplevel directory for MUMPS Benchmarks (identical to --aster_root)"), metavar="DIR")
    parser.add_option("--aster_root", dest="ASTER_ROOT", action='store',
    #       default='/opt/aster',    not here !
-         help=_("define toplevel directory for Code_Aster (default '/opt/aster')"), metavar="DIR")
+         help=_("define toplevel directory for MUMPS Benchmarks (default '/opt/aster')"), metavar="DIR")
    parser.add_option("--sourcedir", dest="SOURCEDIR", action='store',
    #       default='./SRC',         not here !
          help=_("directory which contains archive files (default './SRC')"),
@@ -320,7 +314,7 @@ def main():
    incdirs.extend(['/usr/local/include', '/usr/include', '/include',
                    '/usr/X11R6/include', '/usr/include/X11', '/usr/openwin/include',])
 
-   # 1.3.2. ----- convert uname value to Code_Aster terminology...
+   # 1.3.2. ----- convert uname value to MUMPS Benchmarks terminology...
    sysname, nodename, release, version, machine = os.uname()
    log._print('Architecture : os.uname = %s' % str(os.uname()), DBG=True)
    plt = sys.platform
@@ -463,7 +457,7 @@ def main():
    # 1.4.0a. ----- system info
    ftools.check(' '.join([sysname, '/', os.name, '/', cfg['ARCH']]), 'architecture')
    ftools.get_cpu_number()
-   ftools.check(cfg['IFDEF'], 'Code_Aster platform type')
+   ftools.check(cfg['IFDEF'], 'MUMPS Benchmarks platform type')
 
    # 1.4.1a. ----- checking for shell script interpreter
    ftools.find_and_set(cfg, 'SHELL_EXECUTION', ['bash', 'ksh', 'zsh'], err=False)
@@ -502,7 +496,7 @@ def main():
          ftools.AddToCache('lib', glob_lib, cfg['__tmp__'])
          sys_lib.append(glob_lib)
 
-   # 1.4.1g. ----- check for system dependent libraries (and only used by Code_Aster)
+   # 1.4.1g. ----- check for system dependent libraries (and only used by MUMPS Benchmarks)
    cfg['SYSLIB'] = cfg.get('SYSLIB', '')
    aster_sys_lib = []
    if cfg['IFDEF'] in ('LINUX', 'P_LINUX', 'LINUX64'):

@@ -3,15 +3,15 @@
 # COPYRIGHT (C) 1991 - 2018  EDF R&D                  WWW.CODE-ASTER.ORG
 "Package info"
 
-modname      = 'codeaster-setup'
-version      = '13.6.0'
-numversion   = (13, 6, 0)
+modname      = 'MUMPS Benchmark-setup'
+version      = '0.0.1'
+numversion   = (0, 0, 1)
 release      = '1'
 
 license      = 'GPL, LGPL, non-free'
 copyright    = 'Copyright (c) 2001-2018 EDF R&D - http://www.code-aster.org'
 
-short_desc   = "Setup script for Code_Aster and some prerequisites"
+short_desc   = "Setup script for MUMPS Benchmarks and some prerequisites"
 long_desc    = short_desc
 
 author       = "EDF R&D"
@@ -30,15 +30,10 @@ dict_prod = {'aster': '13.6.0',
  'tfel': '3.0.0'}
 
 dict_prod_param = {'__to_install__': ['med',
-                    'astk',
-                    'hdf5',
-                    'tfel',
                     'metis',
                     'aster',
-                    'grace',
                     'mumps',
-                    'homard',
                     'scotch',
-                    'gmsh'],
+                    'ptscotch'],
  'aster-verslabel': 'stable'}
 
