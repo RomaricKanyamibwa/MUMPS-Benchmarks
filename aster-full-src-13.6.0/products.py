@@ -88,282 +88,6 @@ def lib64_symlink(self, **kwargs):
         relative_symlink('lib64', 'lib')
 
 #-------------------------------------------------------------------------------
-# 10. ----- hdf5
-def setup_hdf5(dep, summary, **kargs):
-   cfg=dep.cfg
-   product = 'hdf5'
-   version = dict_prod[product]
-   pkg_name = '%s-%s' % (product, version)
-   # ----- add (and check) product dependencies
-   dep.Add(product,
-      req=['ASTER_ROOT',],
-      set=['HOME_HDF',],
-   )
-   cfg['HOME_HDF'] = osp.join(cfg['ASTER_ROOT'], 'public', pkg_name)
-   ftools=kargs['find_tools']
-   ftools.AddToPathVar(cfg, 'PATH', osp.join(cfg['HOME_HDF'], 'bin'))
-
-   # ----- setup instance
-   setup=SETUP(
-      product=product,
-      version=version,
-      description="""HDF5 is a Hierarchical Data Format product consisting of a data format
-   specification and a supporting library implementation. HDF5 is designed to
-   address some of the limitations of the older HDF product and to address current
-   and anticipated requirements of modern systems and applications.""",
-      depend=dep,
-      system=kargs['system'],
-      log=kargs['log'],
-      reinstall=kargs['reinstall'],
-
-      actions=(
-         ('IsInstalled', { 'filename' :
-             [osp.join('__setup.installdir__', 'lib', 'libhdf5.a'),
-              osp.join('__setup.installdir__', 'include', 'hdf5.h')]
-         } ),
-         ('Extract'  , {}),
-         # gcc>=4.9 not supported by configure, should not use -ansi
-         # use CFLAGS to force the option
-         ('Configure', {
-            'command' : 'unset LD ; CFLAGS=-std=gnu9x ./configure --prefix=%s' % cfg['HOME_HDF'],
-         }),
-         ('Make'     , { 'nbcpu' : ftools.nbcpu }),
-         ('Install'  , {}),
-         ('Install'  , {
-            'external'  : lib64_symlink,
-            'path'      : '__setup.installdir__',
-         }),
-         ('Clean'    , {}),
-      ),
-
-      installdir  = cfg['HOME_HDF'],
-      sourcedir   = cfg['SOURCEDIR'],
-   )
-   return setup
-
-#-------------------------------------------------------------------------------
-# 12. ----- med
-def setup_med(dep, summary, **kargs):
-   cfg=dep.cfg
-   product='med'
-   version = dict_prod[product]
-   pkg_name = '%s-%s' % (product, version)
-   # ----- add (and check) product dependencies
-   dep.Add(product,
-      req=['ASTER_ROOT', 'HOME_HDF', 'OTHERLIB', 'CXXLIB',],
-      set=['HOME_MED',],
-   )
-   cfg['HOME_MED']=osp.join(cfg['ASTER_ROOT'], 'public', pkg_name)
-   ftools=kargs['find_tools']
-   ftools.AddToPathVar(cfg, 'PATH', osp.join(cfg['HOME_MED'], 'bin'))
-
-   if cfg['PLATFORM'] == 'darwin':
-      # OS X linker does not support '--no-as-needed' option
-      # plus passing python lib is necessary when using Swig on OS X
-      # http://stackoverflow.com/questions/14782925/compiling-c-with-swig-on-mac-os-x
-      ldflags='-lpython '
-   else:
-      ldflags = '-Wl,--no-as-needed '
-   ldflags += cfg['OTHERLIB'] + ' ' + cfg['CXXLIB']
-   disable_shared = ''
-
-   # ----- setup instance
-   setup=SETUP(
-      product=product,
-      version=version,
-      description="""MED-fichier (Modelisation et Echanges de Donnees, in English Modelisation
-   and Data Exchange) is a library to store and exchange meshed data or computation results.
-   It uses the HDF5 file format to store the data.""",
-      depend=dep,
-      system=kargs['system'],
-      log=kargs['log'],
-      reinstall=kargs['reinstall'],
-
-      actions=(
-         ('IsInstalled', { 'filename' :
-             [osp.join('__setup.installdir__', 'lib', 'libmed.a'),
-              osp.join('__setup.installdir__', 'include', 'med.h')]
-         } ),
-         ('Extract'  , {}),
-         ('Configure', {      # --with-med_int=long --disable-mesgerr
-            'command' : ("unset LD ; export LDFLAGS='{0}' ; export F77=$F90; "
-                         "export CXXFLAGS='-std=gnu++98'; "
-                         "./configure {1} "
-                        "--disable-mesgerr --with-hdf5={2} --prefix={3}")
-                        .format(ldflags, disable_shared, cfg['HOME_HDF'], cfg['HOME_MED']),
-         }),
-         ('Make'     , { 'nbcpu' : ftools.nbcpu }),
-         ('Install'  , {}),
-         ('Install'  , {
-            'external'  : lib64_symlink,
-            'path'      : '__setup.installdir__',
-         }),
-         ('Clean'    , {}),
-      ),
-
-      installdir  = cfg['HOME_MED'],
-      sourcedir   = cfg['SOURCEDIR'],
-   )
-   return setup
-
-#-------------------------------------------------------------------------------
-# 20. ----- gmsh
-def setup_gmsh(dep, summary, **kargs):
-   cfg=dep.cfg
-   product='gmsh'
-   version = dict_prod[product]
-   pkg_name = '%s-%s-%s' % (product, version, os.uname()[0])
-   # ----- add (and check) product dependencies
-   dep.Add(product,
-      req=['ASTER_ROOT',],
-      set=['HOME_GMSH',]
-   )
-   cfg['HOME_GMSH'] = osp.join(cfg['ASTER_ROOT'], 'public', pkg_name)
-   ftools=kargs['find_tools']
-   ftools.AddToPathVar(cfg, 'PATH', osp.join(cfg['HOME_GMSH'], 'bin'))
-
-   # ----- setup instance
-   setup=SETUP(
-      product=product,
-      version=version,
-      description="""Gmsh is an automatic three-dimensional finite element mesh generator,
-   primarily Delaunay, with built-in pre- and post-processing
-   facilities. Its primal design goal is to provide a simple meshing tool
-   for academic test cases with parametric input and up to date
-   visualization capabilities.  One of the strengths of Gmsh is its
-   ability to respect a characteristic length field for the generation of
-   adapted meshes on lines, surfaces and volumes.""",
-      content=pkg_name,
-      depend=dep,
-      system=kargs['system'],
-      log=kargs['log'],
-      reinstall=kargs['reinstall'],
-
-      actions=(
-         ('IsInstalled', { 'filename' :
-             [osp.join('__setup.installdir__', 'bin', 'gmsh')]
-         } ),
-         ('Extract'  , {}),
-      ),
-
-      installdir  = cfg['HOME_GMSH'],
-      workdir     = osp.join(cfg['HOME_GMSH'], os.pardir),
-      sourcedir   = cfg['SOURCEDIR'],
-   )
-   return setup
-
-#-------------------------------------------------------------------------------
-# 21. ----- grace
-def setup_grace(dep, summary, **kargs):
-   cfg=dep.cfg
-   product='grace'
-   version = dict_prod[product]
-   pkg_name = '%s-%s' % (product, version)
-   # ----- add (and check) product dependencies
-   dep.Add(product,
-      req=['ASTER_ROOT',],
-      set=['HOME_GRACE',]
-   )
-   cfg['HOME_GRACE'] = osp.join(cfg['ASTER_ROOT'], 'public', pkg_name)
-   ftools=kargs['find_tools']
-   ftools.AddToPathVar(cfg, 'PATH', osp.join(cfg['HOME_GRACE'], 'bin'))
-
-   # ----- check for libXm
-   ftools.findlib_and_set(cfg, 'X11LIB', 'Xm',
-      append=True, err=False)       # err=False, optional product !
-
-   # ----- setup instance
-   setup=SETUP(
-      product=product,
-      version=version,
-      description="""Grace is a WYSIWYG tool to make two-dimensional plots
-   of numerical data.""",
-      depend=dep,
-      system=kargs['system'],
-      log=kargs['log'],
-      reinstall=kargs['reinstall'],
-
-      actions=(
-         ('Extract'  , {}),
-         ('Configure', {}),
-         ('Make'     , { 'nbcpu' : ftools.nbcpu }),
-         ('Install'  , {}),
-         ('Clean'    , {}),
-      ),
-
-      installdir  = cfg['HOME_GRACE'],
-      sourcedir   = cfg['SOURCEDIR'],
-   )
-   return setup
-
-#-------------------------------------------------------------------------------
-# 30. ----- astk
-def setup_astk(dep, summary, **kargs):
-   cfg=dep.cfg
-   product='astk'
-   version = dict_prod[product]
-   pkg_name = '%s-%s' % (product, version)
-   # ----- add (and check) product dependencies
-   dep.Add(product,
-      req=['ASTER_ROOT', 'ASTER_VERSLABEL',
-           'HOME_PYTHON', 'PYTHON_EXE', 'IFDEF',
-           'TERMINAL', 'EDITOR', 'SHELL_EXECUTION',
-           'PS_COMMAND_CPU', 'PS_COMMAND_PID',
-           'DEBUGGER_COMMAND', 'DEBUGGER_COMMAND_POST',
-           'SERVER_NAME', 'DOMAIN_NAME', 'FULL_SERVER_NAME', 'NODE' ],
-      set=['HOME_TCL_TK', 'WISH_EXE',],
-   )
-   # should work with most of these versions (note empty string '')
-   # (8.5 never tested : at the end)
-   ftools=kargs['find_tools']
-   if cfg.get('WISH_EXE') is None:
-      ftools.find_and_set(cfg, 'WISH_EXE',
-         filenames=['wish'+v for v in ['8.4', '84', '8.3', '83', '', '8.5', '85',]],
-         paths=cfg.get('HOME_TCL_TK', []),)
-      ftools.CheckFromLastFound(cfg, 'HOME_TCL_TK', 'bin')
-      if not cfg.has_key('HOME_TCL_TK'):
-         cfg['HOME_TCL_TK']=osp.abspath(osp.join(cfg['WISH_EXE'],os.pardir,os.pardir))
-
-   # specific values for 'ASTK_SERV' files
-   astk_cfg=cfg.copy()
-   astk_cfg['ASTER_VERSION'] = cfg['ASTER_VERSLABEL']
-   astk_cfg[cfg['IFDEF']]='\n'
-   # patch for zsh in as_serv
-   if re.search('zsh$', astk_cfg['SHELL_EXECUTION']):
-      astk_cfg['USE_ZSH']=' added for zsh\n'
-   if astk_cfg.has_key('OPT_ENV'):
-      astk_cfg['OPT_ENV']='\n'+astk_cfg['OPT_ENV']
-
-   # fill PYTHONPATH
-   ftools.AddToPathVar(cfg, 'PYTHONPATH', GetSitePackages(cfg['ASTER_ROOT']))
-
-   # ----- setup instance
-   setup=SETUP(
-      product=product,
-      version=version,
-      description="""ASTK is the Graphical User Interface to manage Code_Aster calculations.""",
-      depend=dep,
-      system=kargs['system'],
-      log=kargs['log'],
-      reinstall=kargs['reinstall'],
-
-      actions=(
-         ('Extract'  , {}),
-         ('Configure', {
-            'external' : export_parameters,
-            'filename' : 'external_configuration.py',
-            'dict_cfg' : astk_cfg,
-         }),
-         ('PyInstall', { 'cmd_opts' : '--force' }),
-         ('Clean',     {}),
-      ),
-
-      installdir  = GetSitePackages(cfg['ASTER_ROOT']),
-      sourcedir   = cfg['SOURCEDIR'],
-   )
-   return setup
-
-#-------------------------------------------------------------------------------
 # 40. ----- Metis (standard version)
 def setup_metis(dep, summary, **kargs):
    cfg=dep.cfg
@@ -432,67 +156,72 @@ def setup_metis(dep, summary, **kargs):
    )
    return setup
 
-#-------------------------------------------------------------------------------
-# 41. ----- tfel / mfront
-def setup_tfel(dep, summary, **kargs):
+# 40. ----- Metis (standard version)
+def setup_parmetis(dep, summary, **kargs):
    cfg=dep.cfg
-   product = 'tfel'
+   product='parmetis'
    version = dict_prod[product]
    pkg_name = '%s-%s' % (product, version)
    # ----- add (and check) product dependencies
    dep.Add(product,
       req=['ASTER_ROOT',],
-      set=['HOME_MFRONT',],
+      set=['HOME_METIS',],
    )
-   cfg['HOME_MFRONT'] = osp.join(cfg['ASTER_ROOT'], 'public', pkg_name)
-   ftools=kargs['find_tools']
-   ftools.AddToPathVar(cfg, 'PATH', osp.join(cfg['HOME_MFRONT'], 'bin'))
-   ftools.AddToPathVar(cfg, 'LD_LIBRARY_PATH', osp.join(cfg['HOME_MFRONT'], 'lib'))
-   ftools.AddToPathVar(cfg, 'PYTHONPATH', GetSitePackages(cfg['HOME_MFRONT']))
-   portable = 'OFF'
-   if cfg['PLATFORM'] == 'darwin':
-      # needed for OS X which does not support optimized build with GNU (only CLANG)
-      # http://stackoverflow.com/questions/10327939/erroring-on-no-such-instruction-while-assembling-project-on-mac-os-x-lion
-      portable = 'ON'
+   cfg['HOME_METIS'] = osp.join(cfg['ASTER_ROOT'], 'public', pkg_name)
+
+   # metis5
+   actions = (
+     ('IsInstalled', { 'filename' :
+         [osp.join('__setup.installdir__', 'lib', 'libmetis.a'),
+          osp.join('__setup.installdir__', 'include', 'metis.h'), ]
+     } ),
+     ('Extract'  , {}),
+     ('Configure', {
+        'command': 'make config prefix=%(dest)s' % { 'dest' : cfg['HOME_METIS'] },
+     }),
+     ('Make'     , { 'nbcpu' : kargs['find_tools'].nbcpu }),
+     ('Install'  , {}),
+     ('Clean',     {}),
+   )
+
+   # metis4
+   if version.startswith('4'):
+      actions = (
+         ('IsInstalled', { 'filename' :
+             [osp.join('__setup.installdir__', 'lib', 'libmetis.a'),
+              osp.join('__setup.installdir__', 'lib', 'libparmetis.a'),
+              osp.join('__setup.installdir__', 'include', 'metis.h'),
+              osp.join('__setup.installdir__', 'include', 'parmetis.h'), ]
+         } ),
+         ('Extract'  , {}),
+         ('ChgFiles' , {
+            'files'     : ['Makefile.in'],
+            'dtrans'    : cfg,
+         }),
+         ('Make'     , { 'nbcpu' : kargs['find_tools'].nbcpu }),
+         ('Install'  , {
+            'command'   : 'make config prefix=%(dest)s;make install prefix=%(dest)s ; ' \
+                          'cp Makefile.in %(dest)s' \
+               % { 'dest' : cfg['HOME_METIS'] },
+         }),
+         ('Clean',     {}),
+      )
 
    # ----- setup instance
    setup=SETUP(
       product=product,
       version=version,
-      description="""MFront is a code generator which translates a set of
-    closely related domain specific languages into plain C++ on top of the
-    TFEL library.""",
+      description="""METIS is a software package for partitioning unstructured graphs,
+   partitioning meshes, and computing fill-reducing orderings of sparse matrices.
+   This version is for MUMPS needs.""",
       depend=dep,
       system=kargs['system'],
       log=kargs['log'],
       reinstall=kargs['reinstall'],
 
-      actions=(
-         ('IsInstalled', { 'filename' :
-             [osp.join('__setup.installdir__', 'lib', 'libTFELSystem.so'),
-              osp.join('__setup.installdir__', 'lib', 'libAsterInterface.so'),
-              osp.join('__setup.installdir__', 'include', 'MFront', 'MFront.hxx')]
-         } ),
-         ('Extract'  , {}),
-         ('Configure', {
-            'command' : ('mkdir build ; cd build ; '
-                'cmake .. -DTFEL_SVN_REVISION=%s -DCMAKE_BUILD_TYPE=Release '
-                '-Dlocal-castem-header=ON -Denable-fortran=ON '
-                '-DPython_ADDITIONAL_VERSIONS=2.7 -Denable-python=ON '
-                '-Denable-broken-boost-python-module-visibility-handling=ON '
-                '-Denable-python-bindings=ON '
-                '-Denable-cyrano=ON -Denable-aster=ON '
-                '-Ddisable-reference-doc=ON -Ddisable-website=ON '
-                '-Denable-portable-build=%s -DCMAKE_INSTALL_PREFIX=%s') \
-                % (version, portable, cfg['HOME_MFRONT']),
-         }),
-         ('Make'     , { 'path'    : osp.join('__setup.workdir__', '__setup.content__', 'build'),
-                         'nbcpu' : ftools.nbcpu }),
-         ('Install'  , { 'path'    : osp.join('__setup.workdir__', '__setup.content__', 'build'), }),
-         ('Clean'    , {}),
-      ),
+      actions=actions,
 
-      installdir  = cfg['HOME_MFRONT'],
+      installdir  = cfg['HOME_METIS'],
       sourcedir   = cfg['SOURCEDIR'],
    )
    return setup
@@ -866,49 +595,6 @@ def setup_aster(dep, summary, **kargs):
       ),
 
       installdir  = cfg['ASTER_ROOT'],
-      sourcedir   = cfg['SOURCEDIR'],
-   )
-   return setup
-
-#-------------------------------------------------------------------------------
-# 59. ----- homard
-def setup_homard(dep, summary, **kargs):
-   cfg=dep.cfg
-   product='homard'
-   version = dict_prod[product]
-   pkg_name = '%s-%s' % (product, version)
-   # ----- add (and check) product dependencies
-   dep.Add(product,
-      req=['ASTER_ROOT', 'PYTHON_EXE'],
-      set=['HOME_HOMARD'],
-   )
-   cfg['HOME_HOMARD'] = osp.join(cfg['ASTER_ROOT'], 'public', pkg_name)
-
-   # ----- setup instance
-   setup=SETUP(
-      product=product,
-      version=version,
-      description="""The HOMARD software carries out the adaptation of 2D/3D finite element or
-   finite volume meshes by refinement and unrefinement techniques.""",
-      #content='HOMARD',
-      depend=dep,
-      system=kargs['system'],
-      log=kargs['log'],
-      reinstall=kargs['reinstall'],
-
-      actions=(
-         ('IsInstalled', { 'filename' :
-           [osp.join('__setup.installdir__', 'ASTER_HOMARD', 'homard'),
-            osp.join('__setup.installdir__', 'ASTER_HOMARD', 'homard.py'), ]
-         }),
-         ('Extract'  , {}),
-         ('Install'  , { 'command' :
-            '%(PYTHON_EXE)s setup_homard.py --prefix=%(HOME_HOMARD)s' % cfg
-            }),
-         ('Clean'    , {}),
-      ),
-
-      installdir  = cfg['HOME_HOMARD'],
       sourcedir   = cfg['SOURCEDIR'],
    )
    return setup

@@ -80,7 +80,7 @@ def main():
    #-------------------------------------------------------------------------------
    # 0.1. ----- list of products to install (could be skip through cfg)
    t_ini = time.time()
-   to_install_ordered=['scotch','ptscotch','metis','mumps']
+   to_install_ordered=['scotch','ptscotch','metis','parmetis','mumps']
    to_install = [prod for prod in to_install_ordered if prod in available_products]
 
    __aster_version__ = short_version
