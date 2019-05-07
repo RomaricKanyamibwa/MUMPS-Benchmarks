@@ -2,6 +2,14 @@
 # Created by https://www.gitignore.io/api/c,c++,python,fortran
 # Edit at https://www.gitignore.io/?templates=c,c++,python,fortran
 
+*.dbg*
+*.log*
+*.cfg
+README_*
+*.cache
+SRC/
+public/
+
 ### C ###
 # Prerequisites
 *.d
