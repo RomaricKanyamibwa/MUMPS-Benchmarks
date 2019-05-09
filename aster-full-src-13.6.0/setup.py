@@ -665,7 +665,7 @@ def main():
          cfg['DEBUGGER_COMMAND'] = '%s --%s --debugger %s --command=@D @E @C' \
             % (ddd, debugger, debugger_command)
 
-   # 1.4.7. ----- check for utilities (for scotch)
+   # 1.4.7. ----- check for utilities (for scotch/ptscotch)
    ftools.find_and_set(cfg, 'FLEX', 'flex', err=False)
    ftools.find_and_set(cfg, 'RANLIB', 'ranlib', err=False)
    ftools.find_and_set(cfg, 'YACC', 'bison', err=False)
@@ -679,11 +679,6 @@ def main():
       and (not cfg.get('FLEX') or not cfg.get('RANLIB') or not cfg.get('YACC')):
       to_install.remove('ptscotch')
 
-   # 1.4.8. ----- check for utilities (for tfel)
-   ftools.find_and_set(cfg, 'CMAKE', 'cmake', err=False)
-   if not opts.ign_err and 'tfel' in to_install and not cfg.get('CMAKE'):
-       log._print("\nWARNING: cmake is missing. You won't be able to install Mfront.")
-       to_install.remove('tfel')
 
    #-------------------------------------------------------------------------------
    # 1.5. ----- products configuration
@@ -717,13 +712,13 @@ def main():
 
    # 1.6.2. ----- optional packages for aster
    # hdf5
-   cfg['HOME_HDF']    = cfg.get('HOME_HDF', '')
+   # cfg['HOME_HDF']    = cfg.get('HOME_HDF', '')
    # med
-   cfg['HOME_MED']    = cfg.get('HOME_MED', '')
+   # cfg['HOME_MED']    = cfg.get('HOME_MED', '')
    # MUMPS
    cfg['HOME_MUMPS']  = cfg.get('HOME_MUMPS', '')
    # MFRONT
-   cfg['HOME_MFRONT']   = cfg.get('HOME_MFRONT', '')
+   # cfg['HOME_MFRONT']   = cfg.get('HOME_MFRONT', '')
    # SCOTCH
    cfg['HOME_SCOTCH'] = cfg.get('HOME_SCOTCH', '')
    # MPI

@@ -173,7 +173,9 @@ def setup_parmetis(dep, summary, **kargs):
    actions = (
      ('IsInstalled', { 'filename' :
          [osp.join('__setup.installdir__', 'lib', 'libmetis.a'),
-          osp.join('__setup.installdir__', 'include', 'metis.h'), ]
+          osp.join('__setup.installdir__', 'lib', 'libparmetis.a'),
+          osp.join('__setup.installdir__', 'include', 'metis.h'),
+          osp.join('__setup.installdir__', 'include', 'parmetis.h'), ]
      } ),
      ('Extract'  , {}),
      ('Configure', {
@@ -194,14 +196,13 @@ def setup_parmetis(dep, summary, **kargs):
               osp.join('__setup.installdir__', 'include', 'parmetis.h'), ]
          } ),
          ('Extract'  , {}),
-         ('ChgFiles' , {
-            'files'     : ['Makefile.in'],
-            'dtrans'    : cfg,
-         }),
-         ('Make'     , { 'nbcpu' : kargs['find_tools'].nbcpu }),
+         ('Configure', {
+            'command': 'make config cc=%(CC)s cxx=%(CXX)s openmp=openmp prefix=%(dest)s'\
+             % { 'CC' : cfg['CC'] ,'CXX' : cfg['CXX'] ,'dest' : cfg['HOME_METIS'] },
+          }),
+         # ('Make'     , { 'nbcpu' : kargs['find_tools'].nbcpu }),
          ('Install'  , {
-            'command'   : 'make config prefix=%(dest)s;make install prefix=%(dest)s ; ' \
-                          'cp Makefile.in %(dest)s' \
+            'command'   : 'make install prefix=%(dest)s' \
                % { 'dest' : cfg['HOME_METIS'] },
          }),
          ('Clean',     {}),

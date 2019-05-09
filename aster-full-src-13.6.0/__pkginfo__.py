@@ -20,7 +20,7 @@ author_email = "code-aster@edf.fr"
 dict_prod = {'aster': '13.6.0',
  'metis': '5.1.0',
  'parmetis': '4.0.3',
- 'mumps': '5.1.1',
+ 'mumps': '5.1.2',
  'scotch': '6.0.4'}
 
 dict_prod_param = {'__to_install__': [
