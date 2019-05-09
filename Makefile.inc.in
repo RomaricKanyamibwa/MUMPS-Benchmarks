@@ -1,0 +1,90 @@
+#
+#  This file is part of MUMPS 5.1.2, released
+#  on Mon Oct  2 07:37:01 UTC 2017
+#
+# These settings for a PC under Debian/linux with standard packages :
+# metis (parmetis), scotch (ptscotch), openmpi, gfortran
+
+# packages installation : 
+# apt-get install libmetis-dev libparmetis-dev libscotch-dev libptscotch-dev libatlas-base-dev openmpi-bin libopenmpi-dev lapack-dev
+
+# Begin orderings
+SCOTCHDIR = ?SCOTCH?
+LSCOTCHDIR = $(SCOTCHDIR)/lib
+ISCOTCH   = -I$(SCOTCHDIR)/include
+
+LSCOTCH   = -L$(LSCOTCHDIR) ?LIB_SCOTCH? ?STLIB_SCOTCH?
+# -lptesmumps -lscotch -lptscotch -lptscotcherr
+# LSCOTCH   = -L$(LSCOTCHDIR) -lesmumps -lscotch -lscotcherr
+
+LPORDDIR = $(topdir)/PORD/lib/
+IPORD    = -I$(topdir)/PORD/include/
+LPORD    = -L$(LPORDDIR) -lpord
+
+METISDIR = ?METIS?
+LMETISDIR = $(METISDIR)/lib
+IMETIS    = -I/usr/include -I$(METISDIR)/include
+#-I../parmetis-4.0.3/metis/include
+# IMETIS    = -I/usr/include/metis
+
+LMETIS    = -L$(LMETISDIR) ?LIB_METIS? ?STLIB_METIS?
+# -lparmetis -lmetis
+# LMETIS    = -L$(LMETISDIR) -lmetis
+
+# Corresponding variables reused later
+ORDERINGSF = -Dmetis -Dpord -Dscotch -Dptscotch
+# -Dparmetis
+# ORDERINGSF = -Dmetis -Dpord -Dscotch
+ORDERINGSC  = $(ORDERINGSF)
+
+LORDERINGS = $(LMETIS) $(LPORD) $(LSCOTCH)
+IORDERINGSF = $(ISCOTCH)
+IORDERINGSC = $(IMETIS) $(IPORD) $(ISCOTCH)
+# End orderings
+################################################################################
+
+PLAT    =
+LIBEXT  = .a
+OUTC    = -o 
+OUTF    = -o 
+RM = /bin/rm -f
+# CC = mpicc #gcc
+# FC = mpifort -Wall #gfortran
+# FL = mpifort -Wall#gfortran
+CC      = ?CC?
+FC      = ?FC?
+FL      = ?LINK_FC?
+# AR = ar vr 
+AR      = ?AR? ?ARFLAGS? 
+RANLIB = ranlib
+# LAPACK = -llapack
+# SCALAP  = -lscalapack-openmpi -lblacs-openmpi  -lblacsF77init-openmpi -lblacsCinit-openmpi
+
+INCPAR = ?INC_PAR?
+#-I/usr/lib/x86_64-linux-gnu/openmpi/include
+
+LIBPAR = ?LIB_SCALAPACK?
+
+INCSEQ = -I$(topdir)/libseq
+LIBSEQ  = $(LAPACK) -L$(topdir)/libseq -lmpiseq
+
+# LIBBLAS = -lblas
+# LIBOTHERS = -lpthread -g
+
+LIBBLAS = ?LIBPATH? ?LIB_MATH? ?STLIB_MATH?
+LIBOTHERS =  ?LIBPATH? ?LIB_SYS? ?STLIB_SYS? ?OPTLIB_FLAGS? ?OPTLIB_FLAGS_MATH?
+
+#Preprocessor defs for calling Fortran from C (-DAdd_ or -DAdd__ or -DUPPER)
+# CDEFS   = -DAdd_
+CDEFS   = ?DEFINES?
+
+#Begin Optimized options
+# uncomment -fopenmp in lines below to benefit from OpenMP
+OPTF    = -O ?FCFLAGS? ?FCFLAGS_OPENMP?
+OPTL    = -O ?LINKFLAGS? ?LINKFLAGS_OPENMP? ?LINKFLAGS_CLIB?
+OPTC    = -O ?CFLAGS?
+#End Optimized options
+ 
+INCS = $(INCPAR) ?INCS?
+LIBS = -L/usr/lib -L$(METISDIR)/build/Linux-x86_64/libmetis $(LIBPAR) ?LIBS?
+LIBSEQNEEDED =
