@@ -463,6 +463,48 @@ def setup_mumps(dep, summary, **kargs):
    return setup
 
 #-------------------------------------------------------------------------------
+# 45. ----- mumps benchmark
+def setup_mumps_benchmark(dep, summary, **kargs):
+   cfg=dep.cfg
+   product='mumps_benchmark'
+   version = dict_prod[product]
+   pkg_name = '%s-%s' % (product, version)
+   # ----- add (and check) product dependencies
+   dep.Add(product,
+      req=['ASTER_ROOT', 'CC', 'F90', 'LD', 'INCLUDE_MUMPS', 'MATHLIB', 'OTHERLIB',
+           'HOME_METIS', 'HOME_SCOTCH','HOME_MPI','HOME_MUMPS'],
+      set=['HOME_MUMPS_BENCH',],
+   )
+   cfg['HOME_MUMPS_BENCH']=osp.join(cfg['ASTER_ROOT'], 'public', pkg_name)
+   # ----- setup instance
+   setup=SETUP(
+      product=product,
+      version=version,
+      description="""MUMPS Solver Bebchmarks.""",
+      depend=dep,
+      system=kargs['system'],
+      log=kargs['log'],
+      reinstall=kargs['reinstall'],
+
+      actions=(
+         ('Extract'  , {}),
+         ('Clean',     {}),
+      ),
+      clean_actions=(
+         ('Configure', { # to force 'ld' temporarily to null
+            'external'  : set_cfg,
+            'dico'      : cfg,
+            'var'       : 'HOME_MUMPS_BENCH',
+            'value'     : '',
+         }),
+      ),
+
+      installdir  = cfg['HOME_MUMPS_BENCH'],
+      sourcedir   = cfg['SOURCEDIR'],
+   )
+   return setup
+
+#-------------------------------------------------------------------------------
 # 50. ----- Code_Aster
 def write_waf_cfg(self, filename, config, template, **kwargs):
     """Fille and write template into filename"""
@@ -489,7 +531,7 @@ def setup_aster(dep, summary, **kargs):
       req=['ASTER_ROOT', 'ASTER_VERSION',
            'HOME_PYTHON', 'PYTHON_EXE', 'PYTHONLIB',
            'HOME_MUMPS', 'HOME_MPI', 'INCLUDE_MUMPS', 'HOME_METIS',
-           'HOME_MED', 'HOME_HDF', 'HOME_MFRONT',
+           # 'HOME_MED', 'HOME_HDF', 'HOME_MFRONT',
            #'HOME_GMSH', 'HOME_HOMARD', optional
            'LD', 'CC', 'F90', 'CXXLIB', 'OTHERLIB', 'SYSLIB', ],
       reqobj=['file:?ASTER_ROOT?/bin/as_run',

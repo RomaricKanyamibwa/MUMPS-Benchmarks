@@ -21,6 +21,7 @@ dict_prod = {'aster': '13.6.0',
  'metis': '5.1.0',
  'parmetis': '4.0.3',
  'mumps': '5.1.2',
+ 'mumps_benchmark': '0.0.1',
  'scotch': '6.0.4'}
 
 dict_prod_param = {'__to_install__': [
@@ -29,6 +30,7 @@ dict_prod_param = {'__to_install__': [
                     'aster',
                     'mumps',
                     'scotch',
+                    'mumps_benchmark',
                     'ptscotch'],
  'aster-verslabel': 'stable'}
 

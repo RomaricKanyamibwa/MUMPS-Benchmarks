@@ -427,7 +427,7 @@ class SETUP:
       if not osp.isfile(archive):
          l_fic = []
          for opt in ('', '-*'):
-            for ext in ('.tar', '.tar.gz', '.tgz', '.tar.bz2'):
+            for ext in ('.tar', '.tar.gz','.tar.xz', '.tgz', '.tar.bz2'):
                l_fic.extend(glob.glob(archive + opt + ext))
          if len(l_fic) > 0:
             archive = l_fic[0]
@@ -1141,7 +1141,7 @@ class SUMMARY:
       self.VerbIgnore = system.VerbIgnore
       self.VerbEnd    = system.VerbEnd
 
-      self._glob_title = "Code_Aster + %d of its prerequisites" % len(self.products)
+      self._glob_title = "MUMPS Benchmark + %d of its prerequisites" % len(self.products)
       self._t_ini = kargs.get('t_ini') or time.time()
       for p in self.products:
          self.diag[p]={
