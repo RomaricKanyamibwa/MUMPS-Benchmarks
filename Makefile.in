@@ -2,8 +2,8 @@
 #  This file is part of MUMPS 5.1.2, released
 #  on Mon Oct  2 07:37:01 UTC 2017
 #
-topdir = mumps-5.1.2
-libdir = mumps-5.1.2/lib
+topdir = ?MUMPSV?
+libdir = ?MUMPSV?/lib
 toplib = -L/usr/lib 
 
 default: d
@@ -21,7 +21,7 @@ cex: c_example
 multi:	multiple_arithmetics_example
 
 
-include Makefile.inc
+include $(topdir)/Makefile.inc
 
 LIBMUMPS_COMMON = $(libdir)/libmumps_common$(PLAT)$(LIBEXT)
 

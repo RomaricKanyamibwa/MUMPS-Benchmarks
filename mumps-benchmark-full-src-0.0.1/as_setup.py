@@ -1155,7 +1155,7 @@ class SUMMARY:
 
 
    def SetGlobal(self, aster_root, version):
-      """Set informations for aster-full
+      """Set informations for mumps_benchmark-full
       """
       self.diag[self._glob_title] = {
             'product'      : self._glob_title,

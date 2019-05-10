@@ -32,5 +32,5 @@ dict_prod_param = {'__to_install__': [
                     'scotch',
                     'mumps_benchmark',
                     'ptscotch'],
- 'aster-verslabel': 'stable'}
+ 'mumps-bench-verslabel': 'stable'}
 

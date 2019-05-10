@@ -172,9 +172,9 @@ def setup_parmetis(dep, summary, **kargs):
    # metis5
    actions = (
      ('IsInstalled', { 'filename' :
-         [osp.join('__setup.installdir__', 'lib', 'libmetis.a'),
+         [#osp.join('__setup.installdir__', 'lib', 'libmetis.a'),
           osp.join('__setup.installdir__', 'lib', 'libparmetis.a'),
-          osp.join('__setup.installdir__', 'include', 'metis.h'),
+          # osp.join('__setup.installdir__', 'include', 'metis.h'),
           osp.join('__setup.installdir__', 'include', 'parmetis.h'), ]
      } ),
      ('Extract'  , {}),
@@ -480,7 +480,7 @@ def setup_mumps_benchmark(dep, summary, **kargs):
    setup=SETUP(
       product=product,
       version=version,
-      description="""MUMPS Solver Bebchmarks.""",
+      description="""MUMPS Solver Benchmarks.""",
       depend=dep,
       system=kargs['system'],
       log=kargs['log'],
@@ -488,6 +488,11 @@ def setup_mumps_benchmark(dep, summary, **kargs):
 
       actions=(
          ('Extract'  , {}),
+         ('Install',   {
+            'command' : 'pwd;cp determinant_test aster_matrix_input *.F Makefile Makefile.inc %(dest)s/'
+            %{'dest':cfg['HOME_MUMPS_BENCH']} ,
+            'capturestderr' : False,
+         }),
          ('Clean',     {}),
       ),
       clean_actions=(

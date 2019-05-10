@@ -386,7 +386,7 @@ def main():
 
    # 1.3.3. ----- variables with predefined value
    cfg['ASTER_VERSION']   = cfg.get('ASTER_VERSION', __aster_version__)
-   cfg['ASTER_VERSLABEL'] = cfg.get('ASTER_VERSLABEL', dict_prod_param['aster-verslabel'])
+   cfg['ASTER_VERSLABEL'] = cfg.get('ASTER_VERSLABEL', dict_prod_param['mumps-bench-verslabel'])
 
    cfg['NODE']       =cfg.get('NODE', nodename.split('.')[0])
 
