@@ -2,8 +2,8 @@
 #  This file is part of MUMPS 5.1.2, released
 #  on Mon Oct  2 07:37:01 UTC 2017
 #
-topdir = ?MUMPSV?
-libdir = ?MUMPSV?/lib
+topdir = ?HOME_MUMPS?
+libdir = $(topdir)/lib
 toplib = -L/usr/lib 
 
 default: d
@@ -17,6 +17,7 @@ c:	csimpletest
 z:	zsimpletest 
 s:	ssimpletest 
 d:	dsimpletest
+seq:dsimpletest_SEQ
 cex: c_example
 multi:	multiple_arithmetics_example
 
@@ -39,6 +40,10 @@ dsimpletest: $(LIBDMUMPS)  $$@.o
 
 
 LIBCMUMPS = $(libdir)/libcmumps$(PLAT)$(LIBEXT) $(LIBMUMPS_COMMON)
+
+dsimpletest_SEQ: $(LIBDMUMPS)  $$@.o 
+	$(FL) -o $@ $(OPTL) dsimpletest_SEQ.o  $(LIBDMUMPS) $(LORDERINGS) $(LIBS) $(LIBBLAS) $(LIBOTHERS)
+
 
 csimpletest: $(LIBCMUMPS)  $$@.o
 	$(FL) -o $@ $(OPTL) csimpletest.o  $(LIBCMUMPS) $(LORDERINGS) $(LIBS) $(LIBBLAS) $(LIBOTHERS)

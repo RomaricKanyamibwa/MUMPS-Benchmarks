@@ -443,7 +443,8 @@ def setup_mumps(dep, summary, **kargs):
             'capturestderr' : False,
          }),
          ('Install',   {
-            'command' : './waf install --jobs=1',
+            'command' : 'cp -r libseq/ PORD/ Makefile.inc %(dest)s; ./waf install --jobs=1' % {'dest':cfg['HOME_MUMPS']}
+            ,
             'capturestderr' : False,
          }),
          ('Clean',     {}),
@@ -476,6 +477,14 @@ def setup_mumps_benchmark(dep, summary, **kargs):
       set=['HOME_MUMPS_BENCH',],
    )
    cfg['HOME_MUMPS_BENCH']=osp.join(cfg['ASTER_ROOT'], 'public', pkg_name)
+
+   bench_cfg = {}.fromkeys(['CC', 'FCFLAGS', 'CFLAGS', 'RANLIB'
+    ,'HOME_METIS', 'HOME_SCOTCH','HOME_MUMPS',], '')
+   bench_cfg.update(cfg)
+
+   bench_cfg['AR']='ar'
+   bench_cfg['ARFLAGS']='-ruv'
+   bench_cfg['LINK_FC']=bench_cfg['FC']
    # ----- setup instance
    setup=SETUP(
       product=product,
@@ -488,8 +497,18 @@ def setup_mumps_benchmark(dep, summary, **kargs):
 
       actions=(
          ('Extract'  , {}),
+         ('Configure', {
+            'command': 'mv Makefile.inc Makefile.inc.orig ; '
+                       'cp Makefile.inc.in Makefile.inc;'
+                       'mv Makefile Makefile.orig ; '
+                       'cp Makefile.in Makefile',
+         }),
+         ('ChgFiles',  {
+            'files'     : ['Makefile.inc','Makefile', ],
+            'dtrans'    : bench_cfg,
+         }),
          ('Install',   {
-            'command' : 'pwd;cp determinant_test aster_matrix_input *.F Makefile Makefile.inc %(dest)s/'
+            'command' : 'pwd;cp determinant_test aster_matrix_input *.F Makefile %(dest)s/'
             %{'dest':cfg['HOME_MUMPS_BENCH']} ,
             'capturestderr' : False,
          }),
