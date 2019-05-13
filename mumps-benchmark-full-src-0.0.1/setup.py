@@ -160,6 +160,9 @@ def main():
    parser.add_option("--noprompt", dest="noprompt", action='store_true',
          default=False,
          help=_("do not ask any questions"),)
+   parser.add_option("--parallel", dest="parallel", action='store_true',
+         default=False,
+         help=_("run on parallel mode"),)
 
    opts, args = parser.parse_args()
    fcfg     = opts.fcfg

@@ -32,7 +32,8 @@ LMETIS    = -L$(LMETISDIR) ?LIB_METIS? ?STLIB_METIS?
 # LMETIS    = -L$(LMETISDIR) -lmetis
 
 # Corresponding variables reused later
-ORDERINGSF = -Dmetis -Dpord -Dscotch -Dptscotch
+ORDERINGSF = ?D_METIS? -Dpord ?D_SCOTCH?
+# ORDERINGSF = -Dmetis -Dparmetis -Dpord -Dscotch -Dptscotch
 # -Dparmetis
 # ORDERINGSF = -Dmetis -Dpord -Dscotch
 ORDERINGSC  = $(ORDERINGSF)

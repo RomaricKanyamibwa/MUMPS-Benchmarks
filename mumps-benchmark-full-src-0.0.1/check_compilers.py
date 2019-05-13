@@ -117,7 +117,8 @@ class CONFIGURE_COMPILER:
       for var in self.compilers:
          # set in setup.cfg ?
          ini = self.check_init_value(var)
-         if ini is not None:
+         # if ini is not None:
+         if ini is None:
             continue
          searched = getattr(self, var)
          try:

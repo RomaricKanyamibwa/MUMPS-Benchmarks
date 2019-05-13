@@ -31,6 +31,7 @@ import os
 import os.path as osp
 import shutil
 import re
+import multiprocessing
 from glob import glob
 from __pkginfo__ import dict_prod, dict_prod_param
 from products_data import (
@@ -111,7 +112,7 @@ def setup_metis(dep, summary, **kargs):
      ('Configure', {
         'command': 'make config prefix=%(dest)s' % { 'dest' : cfg['HOME_METIS'] },
      }),
-     ('Make'     , { 'nbcpu' : kargs['find_tools'].nbcpu }),
+     ('Make'     , { 'nbcpu' : max(multiprocessing.cpu_count(),kargs['find_tools'].nbcpu) }),
      ('Install'  , {}),
      ('Clean',     {}),
    )
@@ -128,7 +129,7 @@ def setup_metis(dep, summary, **kargs):
             'files'     : ['Makefile.in'],
             'dtrans'    : cfg,
          }),
-         ('Make'     , { 'nbcpu' : kargs['find_tools'].nbcpu }),
+         ('Make'     , { 'nbcpu' : max(multiprocessing.cpu_count(),kargs['find_tools'].nbcpu) }),
          ('Install'  , {
             'command'   : 'make install prefix=%(dest)s ; ' \
                           'cp Makefile.in %(dest)s' \
@@ -181,7 +182,7 @@ def setup_parmetis(dep, summary, **kargs):
      ('Configure', {
         'command': 'make config prefix=%(dest)s' % { 'dest' : cfg['HOME_METIS'] },
      }),
-     ('Make'     , { 'nbcpu' : kargs['find_tools'].nbcpu }),
+     ('Make'     , { 'nbcpu' : max(multiprocessing.cpu_count(),kargs['find_tools'].nbcpu) }),
      ('Install'  , {}),
      ('Clean',     {}),
    )
@@ -200,7 +201,7 @@ def setup_parmetis(dep, summary, **kargs):
             'command': 'make config cc=%(CC)s cxx=%(CXX)s openmp=openmp prefix=%(dest)s'\
              % { 'CC' : cfg['CC'] ,'CXX' : cfg['CXX'] ,'dest' : cfg['HOME_METIS'] },
           }),
-         # ('Make'     , { 'nbcpu' : kargs['find_tools'].nbcpu }),
+         # ('Make'     , { 'nbcpu' : max(multiprocessing.cpu_count(),kargs['find_tools'].nbcpu) }),
          ('Install'  , {
             'command'   : 'make install prefix=%(dest)s' \
                % { 'dest' : cfg['HOME_METIS'] },
@@ -289,14 +290,14 @@ def setup_scotch(dep, summary, **kargs):
             }),
          ('Make',      {
             'path'   : osp.join('__setup.workdir__', '__setup.content__', 'src'),
-            'nbcpu'  : 1, # seems not support "-j NBCPU" option
+            'nbcpu'  : multiprocessing.cpu_count(),#1, # seems not support "-j NBCPU" option
          }),
          # only if version >= 6
          version.startswith('5') and (None, None) or \
              ('Make',      {
-                'command': 'make scotch',
+                'command': 'make scotch; make esmumps',
                 'path'   : osp.join('__setup.workdir__', '__setup.content__', 'src'),
-                'nbcpu'  : 1, # seems not support "-j NBCPU" option
+                'nbcpu'  : multiprocessing.cpu_count(),#1, # seems not support "-j NBCPU" option
              }),
          ('Install',   {'command' : 'make install prefix=%s' % cfg['HOME_SCOTCH'],
                         'path'    : osp.join('__setup.workdir__', '__setup.content__', 'src') }),
@@ -376,14 +377,14 @@ def setup_ptscotch(dep, summary, **kargs):
             }),
          ('Make',      {
             'path'   : osp.join('__setup.workdir__', '__setup.content__', 'src'),
-            'nbcpu'  : 1, # seems not support "-j NBCPU" option
+            'nbcpu'  : multiprocessing.cpu_count(),#1, # seems not support "-j NBCPU" option
          }),
          # only if version >= 6
          version.startswith('5') and (None, None) or \
              ('Make',      {
                 'command': 'make ptscotch; make ptesmumps',
                 'path'   : osp.join('__setup.workdir__', '__setup.content__', 'src'),
-                'nbcpu'  : 1, # seems not support "-j NBCPU" option
+                'nbcpu'  : multiprocessing.cpu_count(),#1, # seems not support "-j NBCPU" option
              }),
          ('Install',   {'command' : 'make install prefix=%s' % cfg['HOME_SCOTCH'],
                         'path'    : osp.join('__setup.workdir__', '__setup.content__', 'src') }),
@@ -439,11 +440,11 @@ def setup_mumps(dep, summary, **kargs):
             'capturestderr' : False,
          }),
          ('Make'     , {
-            'command' : './waf build --jobs=1',
+            'command' : './waf build --jobs=%(nbcpu)s'%{'nbcpu':multiprocessing.cpu_count()},
             'capturestderr' : False,
          }),
          ('Install',   {
-            'command' : 'cp -r libseq/ PORD/ Makefile.inc %(dest)s; ./waf install --jobs=1' % {'dest':cfg['HOME_MUMPS']}
+            'command' : 'cp -r libseq/ PORD/ Makefile.inc %(dest)s; ./waf install --jobs=%(nbcpu)s' % {'nbcpu':multiprocessing.cpu_count(),'dest':cfg['HOME_MUMPS']}
             ,
             'capturestderr' : False,
          }),

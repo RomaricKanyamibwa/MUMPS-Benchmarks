@@ -32,36 +32,70 @@
 #LSCOTCH    = -L$(SCOTCHDIR)/lib -lptesmumps -lptscotch -lptscotcherr
 
 
+# LPORDDIR = $(topdir)/PORD/lib/
+# IPORD    = -I$(topdir)/PORD/include/
+# LPORD    = -L$(LPORDDIR) -lpord
+
+# #LMETISDIR = /opt/metis-5.1.0/build/Linux-x86_64/libmetis
+# #IMETIS    = /opt/metis-5.1.0/include
+
+# # You have to choose one among the following two lines depending on
+# # the type of analysis you want to perform. If you want to perform only
+# # sequential analysis choose the first (remember to add -Dmetis in the ORDERINGSF
+# # variable below); for both parallel and sequential analysis choose the second 
+# # line (remember to add -Dparmetis in the ORDERINGSF variable below)
+
+# #LMETIS    = -L$(LMETISDIR) -lmetis
+# #LMETIS    = -L$(LMETISDIR) -lparmetis -lmetis
+
+# # The following variables will be used in the compilation process.
+# # Please note that -Dptscotch and -Dparmetis imply -Dscotch and -Dmetis respectively.
+# # If you want to use Metis 4.X or an older version, you should use -Dmetis4 instead of -Dmetis
+# # or in addition with -Dparmetis (if you are using parmetis 3.X or older).
+# #ORDERINGSF = -Dscotch -Dmetis -Dpord -Dptscotch -Dparmetis
+# ORDERINGSF  = -Dpord
+# ORDERINGSC  = $(ORDERINGSF)
+
+# LORDERINGS = $(LMETIS) $(LPORD) $(LSCOTCH)
+# IORDERINGSF = $(ISCOTCH)
+# IORDERINGSC = $(IMETIS) $(IPORD) $(ISCOTCH)
+
+# #End orderings
+########################################################################
+################################################################################
+# Begin orderings
+SCOTCHDIR = ?HOME_SCOTCH?
+LSCOTCHDIR = $(SCOTCHDIR)/lib
+ISCOTCH   = -I$(SCOTCHDIR)/include
+
+LSCOTCH   = -L$(LSCOTCHDIR) ?LIB_SCOTCH? ?STLIB_SCOTCH?
+# -lptesmumps -lscotch -lptscotch -lptscotcherr
+# LSCOTCH   = -L$(LSCOTCHDIR) -lesmumps -lscotch -lscotcherr
+
 LPORDDIR = $(topdir)/PORD/lib/
 IPORD    = -I$(topdir)/PORD/include/
 LPORD    = -L$(LPORDDIR) -lpord
 
-#LMETISDIR = /opt/metis-5.1.0/build/Linux-x86_64/libmetis
-#IMETIS    = /opt/metis-5.1.0/include
+METISDIR = ?HOME_METIS?
+LMETISDIR = $(METISDIR)/lib
+IMETIS    = -I/usr/include -I$(METISDIR)/include
+#-I../parmetis-4.0.3/metis/include
+# IMETIS    = -I/usr/include/metis
 
-# You have to choose one among the following two lines depending on
-# the type of analysis you want to perform. If you want to perform only
-# sequential analysis choose the first (remember to add -Dmetis in the ORDERINGSF
-# variable below); for both parallel and sequential analysis choose the second 
-# line (remember to add -Dparmetis in the ORDERINGSF variable below)
+LMETIS    = -L$(LMETISDIR) ?LIB_METIS? ?STLIB_METIS?
+# -lparmetis -lmetis
+# LMETIS    = -L$(LMETISDIR) -lmetis
 
-#LMETIS    = -L$(LMETISDIR) -lmetis
-#LMETIS    = -L$(LMETISDIR) -lparmetis -lmetis
-
-# The following variables will be used in the compilation process.
-# Please note that -Dptscotch and -Dparmetis imply -Dscotch and -Dmetis respectively.
-# If you want to use Metis 4.X or an older version, you should use -Dmetis4 instead of -Dmetis
-# or in addition with -Dparmetis (if you are using parmetis 3.X or older).
-#ORDERINGSF = -Dscotch -Dmetis -Dpord -Dptscotch -Dparmetis
-ORDERINGSF  = -Dpord
+# Corresponding variables reused later
+ORDERINGSF = ?D_METIS? -Dpord ?D_SCOTCH?
+# -Dparmetis
+# ORDERINGSF = -Dmetis -Dpord -Dscotch
 ORDERINGSC  = $(ORDERINGSF)
 
 LORDERINGS = $(LMETIS) $(LPORD) $(LSCOTCH)
 IORDERINGSF = $(ISCOTCH)
 IORDERINGSC = $(IMETIS) $(IPORD) $(ISCOTCH)
-
-#End orderings
-########################################################################
+# End orderings
 ################################################################################
 
 PLAT    =
@@ -77,7 +111,7 @@ AR = ar vr
 RANLIB  = echo
 # Make this variable point to the path where the Intel MKL library is
 # installed. It is set to the default install directory for Intel MKL.
-MKLROOT=/opt/intel/mkl/lib/intel64
+# MKLROOT=/opt/intel/mkl/lib/intel64
 LAPACK = -L$(MKLROOT) -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core
 SCALAP = -L$(MKLROOT) -lmkl_scalapack_lp64 -lmkl_blacs_intelmpi_lp64
 
