@@ -8,27 +8,62 @@
 # packages installation : 
 # apt-get install libmetis-dev libparmetis-dev libscotch-dev libptscotch-dev libatlas-base-dev openmpi-bin libopenmpi-dev lapack-dev
 
-# Begin orderings
-LSCOTCHDIR = /usr/lib
-ISCOTCH   = -I/usr/include/scotch
+# # Begin orderings
+# LSCOTCHDIR = /usr/lib
+# ISCOTCH   = -I/usr/include/scotch
 
-#LSCOTCH   = -L$(LSCOTCHDIR) -lptesmumps -lptscotch -lptscotcherr
-LSCOTCH   = -L$(LSCOTCHDIR) -lesmumps -lscotch -lscotcherr
+# #LSCOTCH   = -L$(LSCOTCHDIR) -lptesmumps -lptscotch -lptscotcherr
+# LSCOTCH   = -L$(LSCOTCHDIR) -lesmumps -lscotch -lscotcherr
+
+# LPORDDIR = $(topdir)/PORD/lib/
+# IPORD    = -I$(topdir)/PORD/include/
+# LPORD    = -L$(LPORDDIR) -lpord
+
+# LMETISDIR = /usr/lib 
+# #IMETIS    = -I/usr/include/parmetis
+# IMETIS    = -I/usr/include/metis
+
+# # LMETIS    = -L$(LMETISDIR) -lparmetis -lmetis
+# LMETIS    = -L$(LMETISDIR) -lmetis
+
+# # Corresponding variables reused later
+# #ORDERINGSF = -Dmetis -Dpord -Dparmetis -Dscotch -Dptscotch
+# ORDERINGSF = -Dmetis -Dpord -Dscotch
+# ORDERINGSC  = $(ORDERINGSF)
+
+# LORDERINGS = $(LMETIS) $(LPORD) $(LSCOTCH)
+# IORDERINGSF = $(ISCOTCH)
+# IORDERINGSC = $(IMETIS) $(IPORD) $(ISCOTCH)
+# # End orderings
+# ################################################################################
+################################################################################
+# Begin orderings
+SCOTCHDIR = ?HOME_SCOTCH?
+LSCOTCHDIR = $(SCOTCHDIR)/lib
+ISCOTCH   = -I$(SCOTCHDIR)/include
+
+LSCOTCH   = -L$(LSCOTCHDIR) ?LIB_SCOTCH? ?STLIB_SCOTCH?
+# -lptesmumps -lscotch -lptscotch -lptscotcherr
+# LSCOTCH   = -L$(LSCOTCHDIR) -lesmumps -lscotch -lscotcherr
 
 LPORDDIR = $(topdir)/PORD/lib/
 IPORD    = -I$(topdir)/PORD/include/
 LPORD    = -L$(LPORDDIR) -lpord
 
-LMETISDIR = /usr/lib 
-#IMETIS    = -I/usr/include/parmetis
-IMETIS    = -I/usr/include/metis
+METISDIR = ?HOME_METIS?
+LMETISDIR = $(METISDIR)/lib
+IMETIS    = -I/usr/include -I$(METISDIR)/include
+#-I../parmetis-4.0.3/metis/include
+# IMETIS    = -I/usr/include/metis
 
-# LMETIS    = -L$(LMETISDIR) -lparmetis -lmetis
-LMETIS    = -L$(LMETISDIR) -lmetis
+LMETIS    = -L$(LMETISDIR) ?LIB_METIS? ?STLIB_METIS?
+# -lparmetis -lmetis
+# LMETIS    = -L$(LMETISDIR) -lmetis
 
 # Corresponding variables reused later
-#ORDERINGSF = -Dmetis -Dpord -Dparmetis -Dscotch -Dptscotch
-ORDERINGSF = -Dmetis -Dpord -Dscotch
+ORDERINGSF = ?D_METIS? -Dpord ?D_SCOTCH?
+# -Dparmetis
+# ORDERINGSF = -Dmetis -Dpord -Dscotch
 ORDERINGSC  = $(ORDERINGSF)
 
 LORDERINGS = $(LMETIS) $(LPORD) $(LSCOTCH)

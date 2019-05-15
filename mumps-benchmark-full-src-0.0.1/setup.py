@@ -169,6 +169,7 @@ def main():
    verbose  = opts.verbose
    debug    = opts.debug
    noprompt = opts.noprompt
+   parallel = opts.parallel
    should_continue_reg(noprompt)
 
    main_script=sys.argv[0]
@@ -289,6 +290,25 @@ def main():
          cfg[o]=def_opts[o]
       # if all options are not directories write a different loop
       cfg[o]=os.path.abspath(os.path.expanduser(cfg[o]))
+   
+   log._print(">>>>>>>>>>>>> Executing in Parallel mode.... <<<<<<<<<<<<<")
+   if cfg['PREFER_COMPILER'] == 'GNU':
+      cfg['make_extension']=".debian"
+   else:
+      cfg['make_extension']=".INTEL"
+
+   # print("=================================================================================")
+   # print(cfg['PREFER_COMPILER'])
+   # print("=================================================================================")
+
+   if parallel :
+      cfg['make_extension']+=".PAR"
+   else:
+      cfg['make_extension']+=".SEQ"
+
+   # print("=================================================================================")
+   # print(cfg['make_extension'])
+   # print("=================================================================================")
 
    # 1.2. ----- start a wizard
    # ... perhaps one day !

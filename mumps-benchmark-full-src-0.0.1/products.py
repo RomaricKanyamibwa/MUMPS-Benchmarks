@@ -459,7 +459,7 @@ def setup_mumps(dep, summary, **kargs):
             ,
             'capturestderr' : False,
          }),
-         ('Clean',     {}),
+         # ('Clean',     {}),
       ),
       clean_actions=(
          ('Configure', { # to force 'ld' temporarily to null
@@ -511,21 +511,21 @@ def setup_mumps_benchmark(dep, summary, **kargs):
       actions=(
          ('Extract'  , {}),
          ('Configure', {
-            'command': 'mv Makefile.inc Makefile.inc.orig ; '
-                       'cp Makefile.inc.in Makefile.inc;'
-                       'mv Makefile Makefile.orig ; '
-                       'cp Makefile.in Makefile',
+            'command': 'cp Make/Makefile.inc.in Makefile.inc;'
+                       'cp Make/Makefile.in Makefile',
          }),
          ('ChgFiles',  {
-            'files'     : ['Makefile.inc','Makefile', ],
+            'files'     : ['Makefile.inc','Makefile','Make/Makefile%(ext)s'
+            %{'ext':cfg['make_extension']} ],
             'dtrans'    : bench_cfg,
          }),
          ('Install',   {
-            'command' : 'cp determinant_test aster_matrix_input *.F Makefile Makefile.inc %(dest)s/'
+            'command' : 'cp determinant_test aster_matrix_input *.F'
+            ' Makefile Makefile.inc %(dest)s/'
             %{'dest':cfg['HOME_MUMPS_BENCH']} ,
             'capturestderr' : False,
          }),
-         ('Clean',     {}),
+         # ('Clean',     {}),
       ),
       clean_actions=(
          ('Configure', { # to force 'ld' temporarily to null
