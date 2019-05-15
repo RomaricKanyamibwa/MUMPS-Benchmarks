@@ -77,9 +77,9 @@ LIBEXT  = .a
 OUTC    = -o 
 OUTF    = -o 
 RM = /bin/rm -f
-CC = gcc
-FC = gfortran
-FL = gfortran
+CC = ?CC?
+FC = ?FC?
+FL = ?LINK_FC?
 AR = ar vr 
 RANLIB = ranlib
 LAPACK = -llapack
@@ -97,11 +97,11 @@ CDEFS   = -DAdd_
 
 #Begin Optimized options
 # uncomment -fopenmp in lines below to benefit from OpenMP
-OPTF    = -O # -fopenmp
-OPTL    = -O # -fopenmp
-OPTC    = -O # -fopenmp
+OPTF    = -O -fopenmp
+OPTL    = -O -fopenmp
+OPTC    = -O -fopenmp
 #End Optimized options
  
 INCS = $(INCSEQ)
 LIBS = $(LIBSEQ)
-LIBSEQNEEDED = libseqneeded
+LIBSEQNEEDED = #libseqneeded

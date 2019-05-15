@@ -492,12 +492,14 @@ def setup_mumps_benchmark(dep, summary, **kargs):
 
    bench_cfg = {}.fromkeys(['CC', 'FCFLAGS', 'CFLAGS', 'RANLIB'
     ,'HOME_METIS', 'HOME_SCOTCH','HOME_MUMPS'
-    ,'LIB_SCOTCH','LIB_METIS','D_SCOTCH','D_METIS_'], '')
+    ,'LIB_SCOTCH','LIB_METIS','D_SCOTCH','D_METIS'], '')
    bench_cfg.update(cfg)
 
    bench_cfg['AR']='ar'
    bench_cfg['ARFLAGS']='-ruv'
    bench_cfg['LINK_FC']=bench_cfg['FC']
+   bench_cfg['STLIB_METIS']=""
+   bench_cfg['STLIB_SCOTCH']=""
    # ----- setup instance
    setup=SETUP(
       product=product,
@@ -511,12 +513,12 @@ def setup_mumps_benchmark(dep, summary, **kargs):
       actions=(
          ('Extract'  , {}),
          ('Configure', {
-            'command': 'cp Make/Makefile.inc.in Makefile.inc;'
+            'command': 'cp Make/Makefile%(ext)s Makefile.inc;'%{'ext':cfg['make_extension']}
                        'cp Make/Makefile.in Makefile',
          }),
          ('ChgFiles',  {
-            'files'     : ['Makefile.inc','Makefile','Make/Makefile%(ext)s'
-            %{'ext':cfg['make_extension']} ],
+            'files'     : ['Makefile.inc','Makefile'],
+            # ,'Make/Makefile%(ext)s'%{'ext':cfg['make_extension']} 
             'dtrans'    : bench_cfg,
          }),
          ('Install',   {

@@ -291,7 +291,6 @@ def main():
       # if all options are not directories write a different loop
       cfg[o]=os.path.abspath(os.path.expanduser(cfg[o]))
    
-   log._print(">>>>>>>>>>>>> Executing in Parallel mode.... <<<<<<<<<<<<<")
    if cfg['PREFER_COMPILER'] == 'GNU':
       cfg['make_extension']=".debian"
    else:
@@ -303,6 +302,7 @@ def main():
 
    if parallel :
       cfg['make_extension']+=".PAR"
+      log._print(">>>>>>>>>>>>> Executing in Parallel mode.... <<<<<<<<<<<<<")
    else:
       cfg['make_extension']+=".SEQ"
 
