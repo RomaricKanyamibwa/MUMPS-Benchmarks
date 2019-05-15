@@ -85,9 +85,10 @@ RANLIB = ranlib
 LAPACK = -llapack
 SCALAP  = -lscalapack-openmpi -lblacs-openmpi  -lblacsF77init-openmpi -lblacsCinit-openmpi
 
-INCPAR = -I/usr/lib/openmpi/include
+INCPAR = -I/usr/lib/x86_64-linux-gnu/openmpi/include
 
-LIBPAR = $(SCALAP) $(LAPACK)  -lmpi -lmpi_f77
+LIBPAR = $(SCALAP) $(LAPACK)  -lmpi 
+#-lmpi_f77
 
 INCSEQ = -I$(topdir)/libseq
 LIBSEQ  = $(LAPACK) -L$(topdir)/libseq -lmpiseq
@@ -100,9 +101,9 @@ CDEFS   = -DAdd_
 
 #Begin Optimized options
 # uncomment -fopenmp in lines below to benefit from OpenMP
-OPTF    = -O # -fopenmp
-OPTL    = -O # -fopenmp
-OPTC    = -O # -fopenmp
+OPTF    = -O -fopenmp
+OPTL    = -O -fopenmp
+OPTC    = -O  -fopenmp
 #End Optimized options
  
 INCS = $(INCPAR)

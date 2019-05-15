@@ -101,6 +101,8 @@ def setup_metis(dep, summary, **kargs):
       set=['HOME_METIS',],
    )
    cfg['HOME_METIS'] = osp.join(cfg['ASTER_ROOT'], 'public', pkg_name)
+   cfg['LIB_METIS']  = "-lmetis"
+   cfg['D_METIS']    = "-Dmetis"
 
    # metis5
    actions = (
@@ -169,6 +171,8 @@ def setup_parmetis(dep, summary, **kargs):
       set=['HOME_METIS',],
    )
    cfg['HOME_METIS'] = osp.join(cfg['ASTER_ROOT'], 'public', pkg_name)
+   cfg['LIB_METIS']  = "-lparmetis -lmetis"
+   cfg['D_METIS']    = "-Dmetis -Dparmetis"
 
    # metis5
    actions = (
@@ -198,13 +202,16 @@ def setup_parmetis(dep, summary, **kargs):
          } ),
          ('Extract'  , {}),
          ('Configure', {
-            'command': 'make config cc=%(CC)s cxx=%(CXX)s openmp=openmp prefix=%(dest)s'\
-             % { 'CC' : cfg['CC'] ,'CXX' : cfg['CXX'] ,'dest' : cfg['HOME_METIS'] },
+            'command': 'make -j %(nbcpu)s config cc=%(CC)s cxx=%(CXX)s openmp=openmp prefix=%(dest)s'\
+             % { 'nbcpu' : multiprocessing.cpu_count(),'CC' : cfg['CC'] ,
+             'CXX' : cfg['CXX'] ,'dest' : cfg['HOME_METIS'] },
           }),
          # ('Make'     , { 'nbcpu' : max(multiprocessing.cpu_count(),kargs['find_tools'].nbcpu) }),
          ('Install'  , {
-            'command'   : 'make install prefix=%(dest)s' \
-               % { 'dest' : cfg['HOME_METIS'] },
+            'command'   : 'make -j %(nbcpu)s install prefix=%(dest)s ;'
+            'cp $(find $PWD -iname metis.h) %(dest)s/include;'
+            'cp $(find $PWD -iname *libmetis.*) %(dest)s/lib' \
+               % { 'nbcpu' : multiprocessing.cpu_count(),'dest' : cfg['HOME_METIS'] },
          }),
          ('Clean',     {}),
       )
@@ -240,7 +247,9 @@ def setup_scotch(dep, summary, **kargs):
       req=['ASTER_ROOT', 'FLEX', 'RANLIB', 'YACC'],
       set=['HOME_SCOTCH',],
    )
-   cfg['HOME_SCOTCH']=osp.join(cfg['ASTER_ROOT'], 'public', pkg_name)
+   cfg['HOME_SCOTCH']  =osp.join(cfg['ASTER_ROOT'], 'public', pkg_name)
+   cfg['LIB_SCOTCH'] ="-lesmumps -lscotch -lscotcherr"
+   cfg['D_SCOTCH']     ="-Dscotch"
 
    scotch_cfg = {}.fromkeys(['CC', 'CFLAGS', 'FLEX', 'RANLIB', 'YACC'], '')
    scotch_cfg.update(cfg)
@@ -322,6 +331,8 @@ def setup_ptscotch(dep, summary, **kargs):
       set=['HOME_SCOTCH',],
    )
    cfg['HOME_SCOTCH']=osp.join(cfg['ASTER_ROOT'], 'public', pkg_name)
+   cfg['LIB_SCOTCH'] ="-lptesmumps -lptscotch -lptscotcherr"
+   cfg['D_SCOTCH']     ="-Dscotch -Dptscotch"
 
    scotch_cfg = {}.fromkeys(['CC', 'CFLAGS', 'FLEX', 'RANLIB', 'YACC'], '')
    scotch_cfg.update(cfg)
@@ -480,7 +491,8 @@ def setup_mumps_benchmark(dep, summary, **kargs):
    cfg['HOME_MUMPS_BENCH']=osp.join(cfg['ASTER_ROOT'], 'public', pkg_name)
 
    bench_cfg = {}.fromkeys(['CC', 'FCFLAGS', 'CFLAGS', 'RANLIB'
-    ,'HOME_METIS', 'HOME_SCOTCH','HOME_MUMPS',], '')
+    ,'HOME_METIS', 'HOME_SCOTCH','HOME_MUMPS'
+    ,'LIB_SCOTCH','LIB_METIS','D_SCOTCH','D_METIS_'], '')
    bench_cfg.update(cfg)
 
    bench_cfg['AR']='ar'
@@ -509,7 +521,7 @@ def setup_mumps_benchmark(dep, summary, **kargs):
             'dtrans'    : bench_cfg,
          }),
          ('Install',   {
-            'command' : 'pwd;cp determinant_test aster_matrix_input *.F Makefile %(dest)s/'
+            'command' : 'cp determinant_test aster_matrix_input *.F Makefile Makefile.inc %(dest)s/'
             %{'dest':cfg['HOME_MUMPS_BENCH']} ,
             'capturestderr' : False,
          }),

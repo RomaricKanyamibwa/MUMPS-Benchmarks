@@ -132,4 +132,4 @@ OPTC    = -O -qopenmp
  
 INCS = $(INCSEQ)
 LIBS = $(LIBSEQ)
-LIBSEQNEEDED = libseqneeded
+LIBSEQNEEDED = #libseqneeded
