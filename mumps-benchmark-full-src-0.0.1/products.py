@@ -408,6 +408,20 @@ def setup_ptscotch(dep, summary, **kargs):
    return setup
 
 #-------------------------------------------------------------------------------
+def benchcfg(cfg):
+   bench_cfg = {}.fromkeys(['CC', 'FCFLAGS', 'CFLAGS', 'RANLIB'
+    ,'HOME_METIS', 'HOME_SCOTCH','HOME_MUMPS'
+    ,'LIB_SCOTCH','LIB_METIS','D_SCOTCH','D_METIS'], '')
+   bench_cfg.update(cfg)
+
+   bench_cfg['AR']='ar'
+   bench_cfg['ARFLAGS']='vr'
+   bench_cfg['LINK_FC']=bench_cfg['FC']
+   bench_cfg['STLIB_METIS']=""
+   bench_cfg['STLIB_SCOTCH']=""
+
+   return bench_cfg
+
 # 44. ----- mumps
 def setup_mumps(dep, summary, **kargs):
    cfg=dep.cfg
@@ -421,6 +435,7 @@ def setup_mumps(dep, summary, **kargs):
       set=['HOME_MUMPS',],
    )
    cfg['HOME_MUMPS']=osp.join(cfg['ASTER_ROOT'], 'public', pkg_name)
+   bench_cfg=benchcfg(cfg)
    # ----- setup instance
    setup=SETUP(
       product=product,
@@ -443,20 +458,18 @@ def setup_mumps(dep, summary, **kargs):
          } ),
          ('Extract'  , {}),
          ('Configure', {
-            'command'   : 'CC=%(CC)s FC=%(F90)s '
-                          'LIBPATH="%(HOME_SCOTCH)s/lib %(HOME_METIS)s/lib" '
-                          'INCLUDES="%(HOME_SCOTCH)s/include %(HOME_METIS)s/include" '
-                          'OPTLIB_FLAGS="%(MATHLIB)s %(OTHERLIB)s" '
-                          './waf configure --maths-libs="" --prefix=%(HOME_MUMPS)s --install-tests' % cfg,
-            'capturestderr' : False,
+            'command': 'cp Make/Makefile%(ext)s Makefile.inc'%{'ext':cfg['make_extension']},
+         }),
+         ('ChgFiles',  {
+            'files'     : ['Makefile.inc'],
+            'dtrans'    : bench_cfg,
          }),
          ('Make'     , {
-            # 'command' : './waf build --jobs=%(nbcpu)s'%{'nbcpu':multiprocessing.cpu_count()},
-            'command' : './waf build --jobs=1',
+            'command' : 'make all',
             'capturestderr' : False,
          }),
          ('Install',   {
-            'command' : 'cp -r libseq/ PORD/ Makefile.inc %(dest)s; ./waf install --jobs=%(nbcpu)s' % {'nbcpu':multiprocessing.cpu_count(),'dest':cfg['HOME_MUMPS']}
+            'command' : 'cp -r include/ lib/ libseq/ PORD/ Makefile.inc %(dest)s' % {'dest':cfg['HOME_MUMPS']}
             ,
             'capturestderr' : False,
          }),
@@ -491,16 +504,7 @@ def setup_mumps_benchmark(dep, summary, **kargs):
    )
    cfg['HOME_MUMPS_BENCH']=osp.join(cfg['ASTER_ROOT'], 'public', pkg_name)
 
-   bench_cfg = {}.fromkeys(['CC', 'FCFLAGS', 'CFLAGS', 'RANLIB'
-    ,'HOME_METIS', 'HOME_SCOTCH','HOME_MUMPS'
-    ,'LIB_SCOTCH','LIB_METIS','D_SCOTCH','D_METIS'], '')
-   bench_cfg.update(cfg)
-
-   bench_cfg['AR']='ar'
-   bench_cfg['ARFLAGS']='vr'
-   bench_cfg['LINK_FC']=bench_cfg['FC']
-   bench_cfg['STLIB_METIS']=""
-   bench_cfg['STLIB_SCOTCH']=""
+   bench_cfg=benchcfg(cfg)
    # ----- setup instance
    setup=SETUP(
       product=product,
@@ -515,7 +519,7 @@ def setup_mumps_benchmark(dep, summary, **kargs):
          ('Extract'  , {}),
          ('Configure', {
             'command': 'cp Make/Makefile%(ext)s Makefile.inc;\
-                       cp Make/Makefile.in Makefile '%{'ext':cfg['make_extension']},
+                       cp Make/Makefile.in Makefile'%{'ext':cfg['make_extension']},
          }),
          ('ChgFiles',  {
             'files'     : ['Makefile.inc','Makefile'],
