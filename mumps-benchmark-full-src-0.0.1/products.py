@@ -98,7 +98,7 @@ def setup_metis(dep, summary, **kargs):
    # ----- add (and check) product dependencies
    dep.Add(product,
       req=['ASTER_ROOT',],
-      set=['HOME_METIS',],
+      set=['HOME_METIS','LIB_METIS','D_METIS',],
    )
    cfg['HOME_METIS'] = osp.join(cfg['ASTER_ROOT'], 'public', pkg_name)
    cfg['LIB_METIS']  = "-lmetis"
@@ -168,7 +168,7 @@ def setup_parmetis(dep, summary, **kargs):
    # ----- add (and check) product dependencies
    dep.Add(product,
       req=['ASTER_ROOT',],
-      set=['HOME_METIS',],
+      set=['HOME_METIS','LIB_METIS','D_METIS'],
    )
    cfg['HOME_METIS'] = osp.join(cfg['ASTER_ROOT'], 'public', pkg_name)
    cfg['LIB_METIS']  = "-lparmetis -lmetis"
@@ -245,7 +245,7 @@ def setup_scotch(dep, summary, **kargs):
    # ----- add (and check) product dependencies
    dep.Add(product,
       req=['ASTER_ROOT', 'FLEX', 'RANLIB', 'YACC'],
-      set=['HOME_SCOTCH',],
+      set=['HOME_SCOTCH','LIB_SCOTCH','D_SCOTCH',],
    )
    cfg['HOME_SCOTCH']  =osp.join(cfg['ASTER_ROOT'], 'public', pkg_name)
    cfg['LIB_SCOTCH'] ="-lesmumps -lscotch -lscotcherr"
@@ -328,10 +328,10 @@ def setup_ptscotch(dep, summary, **kargs):
    # ----- add (and check) product dependencies
    dep.Add(product,
       req=['ASTER_ROOT', 'FLEX', 'RANLIB', 'YACC'],
-      set=['HOME_SCOTCH',],
+      set=['HOME_SCOTCH','LIB_SCOTCH','D_SCOTCH',],
    )
    cfg['HOME_SCOTCH']=osp.join(cfg['ASTER_ROOT'], 'public', pkg_name)
-   cfg['LIB_SCOTCH'] ="-lptesmumps -lptscotch -lptscotcherr"
+   cfg['LIB_SCOTCH'] ="-lptesmumps -lscotch -lptscotch -lptscotcherr"
    cfg['D_SCOTCH']     ="-Dscotch -Dptscotch"
 
    scotch_cfg = {}.fromkeys(['CC', 'CFLAGS', 'FLEX', 'RANLIB', 'YACC'], '')
@@ -388,14 +388,14 @@ def setup_ptscotch(dep, summary, **kargs):
             }),
          ('Make',      {
             'path'   : osp.join('__setup.workdir__', '__setup.content__', 'src'),
-            'nbcpu'  : multiprocessing.cpu_count(),#1, # seems not support "-j NBCPU" option
+            'nbcpu'  : 1, # seems not support "-j NBCPU" option
          }),
          # only if version >= 6
          version.startswith('5') and (None, None) or \
              ('Make',      {
                 'command': 'make ptscotch; make ptesmumps',
                 'path'   : osp.join('__setup.workdir__', '__setup.content__', 'src'),
-                'nbcpu'  : multiprocessing.cpu_count(),#1, # seems not support "-j NBCPU" option
+                #'nbcpu'  : , # seems not support "-j NBCPU" option
              }),
          ('Install',   {'command' : 'make install prefix=%s' % cfg['HOME_SCOTCH'],
                         'path'    : osp.join('__setup.workdir__', '__setup.content__', 'src') }),
@@ -451,7 +451,8 @@ def setup_mumps(dep, summary, **kargs):
             'capturestderr' : False,
          }),
          ('Make'     , {
-            'command' : './waf build --jobs=%(nbcpu)s'%{'nbcpu':multiprocessing.cpu_count()},
+            # 'command' : './waf build --jobs=%(nbcpu)s'%{'nbcpu':multiprocessing.cpu_count()},
+            'command' : './waf build --jobs=1',
             'capturestderr' : False,
          }),
          ('Install',   {
@@ -496,7 +497,7 @@ def setup_mumps_benchmark(dep, summary, **kargs):
    bench_cfg.update(cfg)
 
    bench_cfg['AR']='ar'
-   bench_cfg['ARFLAGS']='-ruv'
+   bench_cfg['ARFLAGS']='vr'
    bench_cfg['LINK_FC']=bench_cfg['FC']
    bench_cfg['STLIB_METIS']=""
    bench_cfg['STLIB_SCOTCH']=""
@@ -513,8 +514,8 @@ def setup_mumps_benchmark(dep, summary, **kargs):
       actions=(
          ('Extract'  , {}),
          ('Configure', {
-            'command': 'cp Make/Makefile%(ext)s Makefile.inc;'%{'ext':cfg['make_extension']}
-                       'cp Make/Makefile.in Makefile',
+            'command': 'cp Make/Makefile%(ext)s Makefile.inc;\
+                       cp Make/Makefile.in Makefile '%{'ext':cfg['make_extension']},
          }),
          ('ChgFiles',  {
             'files'     : ['Makefile.inc','Makefile'],
@@ -527,7 +528,7 @@ def setup_mumps_benchmark(dep, summary, **kargs):
             %{'dest':cfg['HOME_MUMPS_BENCH']} ,
             'capturestderr' : False,
          }),
-         # ('Clean',     {}),
+         ('Clean',     {}),
       ),
       clean_actions=(
          ('Configure', { # to force 'ld' temporarily to null

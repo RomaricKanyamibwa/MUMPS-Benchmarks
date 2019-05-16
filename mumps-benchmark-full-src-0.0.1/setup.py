@@ -305,10 +305,9 @@ def main():
       log._print(">>>>>>>>>>>>> Executing in Parallel mode.... <<<<<<<<<<<<<")
    else:
       cfg['make_extension']+=".SEQ"
-
-   # print("=================================================================================")
-   # print(cfg['make_extension'])
-   # print("=================================================================================")
+      if 'ptscotch' in to_install:
+         index=to_install.index("ptscotch")
+         to_install[index]="scotch"
 
    # 1.2. ----- start a wizard
    # ... perhaps one day !
