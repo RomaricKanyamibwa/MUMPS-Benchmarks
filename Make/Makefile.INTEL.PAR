@@ -52,15 +52,17 @@ RANLIB  = echo
 # Make this variable point to the path where the Intel MKL library is
 # installed. It is set to the default install directory for Intel MKL.
 # MKLROOT=/opt/intel/mkl/lib/intel64
-LAPACK = -L$(MKLROOT) -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core
-SCALAP = -L$(MKLROOT) -lmkl_scalapack_lp64 -lmkl_blacs_intelmpi_lp64
+LAPACK = -L${MKLROOT}/lib/intel64/ -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core
+SCALAP = -L${MKLROOT}/lib/intel64/ -lmkl_scalapack_lp64 -lmkl_blacs_intelmpi_lp64
 
 LIBPAR = $(SCALAP) $(LAPACK)
+
+INCPAR = -I${MKLROOT}/include/intel64/ilp64 -I${MKLROOT}/include 
 
 INCSEQ = -I$(topdir)/libseq
 LIBSEQ  = $(LAPACK) -L$(topdir)/libseq -lmpiseq
 
-LIBBLAS = -L$(MKLROOT) -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core 
+LIBBLAS = -L${MKLROOT}/lib/intel64/ -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core 
 LIBOTHERS = -lpthread
 
 #Preprocessor defs for calling Fortran from C (-DAdd_ or -DAdd__ or -DUPPER)

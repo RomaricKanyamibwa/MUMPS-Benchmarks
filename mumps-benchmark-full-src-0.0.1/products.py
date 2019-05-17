@@ -112,7 +112,7 @@ def setup_metis(dep, summary, **kargs):
      } ),
      ('Extract'  , {}),
      ('Configure', {
-        'command': 'make config prefix=%(dest)s' % { 'dest' : cfg['HOME_METIS'] },
+        'command': 'make config prefix=%(dest)s openmp=openmp' % { 'dest' : cfg['HOME_METIS'] },
      }),
      ('Make'     , { 'nbcpu' : max(multiprocessing.cpu_count(),kargs['find_tools'].nbcpu) }),
      ('Install'  , {}),
