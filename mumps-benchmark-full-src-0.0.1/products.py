@@ -518,19 +518,17 @@ def setup_mumps_benchmark(dep, summary, **kargs):
       actions=(
          ('Extract'  , {}),
          ('Configure', {
-            'command': 'cp Make/Makefile%(ext)s Makefile.inc;\
-                       cp Make/Makefile.in Makefile'%{'ext':cfg['make_extension']},
+            'command':'cp Make/Makefile.in Makefile',
          }),
          ('ChgFiles',  {
-            'files'     : ['Makefile.inc','Makefile'],
-            # ,'Make/Makefile%(ext)s'%{'ext':cfg['make_extension']} 
+            'files'     : ['Makefile'],
             'dtrans'    : bench_cfg,
          }),
          ('Install',   {
             'command' : 'cp determinant_test aster_matrix_input *.F'
-            ' Makefile Makefile.inc %(dest)s/'
+            ' Makefile %(dest)s/'
             %{'dest':cfg['HOME_MUMPS_BENCH']} ,
-            'capturestderr' : False,
+            # 'capturestderr' : False,
          }),
          ('Clean',     {}),
       ),
