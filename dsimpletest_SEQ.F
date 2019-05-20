@@ -25,7 +25,6 @@ C
 C       Variables for Flops per step  
       DOUBLE PRECISION gflops_step(3),Giga,determ 
 C     Reduce variables  
-      INTEGER comm
       CHARACTER(len=20) str_fin
 
       REAL start_time, stop_time, elapsed_time
@@ -79,9 +78,6 @@ C         OPEN(unit=8,FILE="aster_matrix_input")
 
         DO I8 = 1, mumps_par%NNZ
           READ(8,*) mumps_par%IRN(I8),mumps_par%JCN(I8),mumps_par%A(I8)
-C           IF (MOD(I8,1000000) .eq. 0) THEN
-C             print*,"I====>",I8
-C           END IF
         END DO
         DO I = 1, mumps_par%N
           IF (typefile .eq. 1) THEN
@@ -89,29 +85,21 @@ C           END IF
           ELSE
               READ(8,*)mumps_par%RHS(I)!for test input matrix
           END IF
-
-C           IF (MOD(I8,100000) .eq. 0) THEN
-C             print*,"Index=",index
-C           END IF
           
         END DO
         CLOSE(8)
-C         call cpu_time(stop_time)
-C         elapsed_time=stop_time-start_time
-C         WRITE(6,'(A,F8.3,A)')"Allocation time:",elapsed_time,"sec"
+
       END IF
 
 C       print*,"-----     End  of problem definition      -----"
 C  Call package for solution
       mumps_par%ICNTL(33)=1
       mumps_par%JOB = 6
-C       call cpu_time(start_time)
-C       start_time=MPI_WTIME()
+
       CALL system_clock ( t1, clock_rate, clock_max )
       CALL DMUMPS(mumps_par)
       CALL system_clock ( t2, clock_rate, clock_max )
-C       stop_time=MPI_WTIME()
-C       call cpu_time(stop_time)
+
       IF (mumps_par%INFOG(1).LT.0) THEN
        WRITE(6,'(A,A,I6,A,I9)') " ERROR RETURN: ",
      &            "  mumps_par%INFOG(1)= ", mumps_par%INFOG(1), 
@@ -121,9 +109,6 @@ C       call cpu_time(stop_time)
 C  Solution has been assembled on the host
       IF ( mumps_par%MYID .eq. 0 ) THEN
 C         WRITE( 6, * ) ' Solution is ',(mumps_par%RHS(I),I=1,mumps_par%N)
-C C         elapsed_time=stop_time-start_time
-C C         WRITE(6,'(A,F8.3,A)')"Resolution time:",elapsed_time,"sec"
-
         print*,""
         print*,"------------------------------------------------------"
         print*,"RINFO(1):",mumps_par%RINFO(1)
@@ -134,23 +119,6 @@ C C         WRITE(6,'(A,F8.3,A)')"Resolution time:",elapsed_time,"sec"
         
 
       END IF
-
-C       IF ( mumps_par%MYID .eq. 1 ) THEN
-C         WRITE( 6, * ) ' Solution is ',(mumps_par%RHS(I),I=1,mumps_par%N)
-C         elapsed_time=stop_time-start_time
-C         WRITE(6,'(A,F8.3,A)')"Resolution time:",elapsed_time,"sec"
-        
-C       print*,"------------------------------------------------------"
-C       print*,mumps_par%MYID,"=>RINFO(1):",mumps_par%RINFO(1)
-C       print*,mumps_par%MYID,"=>RINFO(2):",mumps_par%RINFO(2)
-C       print*,mumps_par%MYID,"=>RINFO(3):",mumps_par%RINFO(3)
-C       print*,"------------------------------------------------------"
-
-
-c      CALL MPI_REDUCE(mumps_par%RINFO,gflops_step, 3, MPI_DOUBLE,
-C      &      MPI_SUM, 0, comm, ierr) 
-
-C       END IF
 
 C  Deallocate user data
       IF ( mumps_par%MYID .eq. 0 )THEN

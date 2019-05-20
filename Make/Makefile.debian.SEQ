@@ -68,9 +68,9 @@ CDEFS   = -DAdd_
 
 #Begin Optimized options
 # uncomment -fopenmp in lines below to benefit from OpenMP
-OPTF    = -O -fopenmp ?F90FLAGS?
-OPTL    = -O -fopenmp ?F90FLAGS?
-OPTC    = -O -fopenmp ?CFLAGS?  
+OPTF    = -fopenmp ?F90FLAGS?
+OPTL    = -fopenmp ?F90FLAGS?
+OPTC    = -fopenmp ?CFLAGS?  
 #End Optimized options
  
 INCS = $(INCSEQ)
