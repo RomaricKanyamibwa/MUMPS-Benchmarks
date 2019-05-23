@@ -73,9 +73,9 @@ CDEFS   = -DAdd_
 
 #Begin Optimized options
 # uncomment -fopenmp in lines below to benefit from OpenMP
-OPTF    = -fopenmp ?F90FLAGS?
-OPTL    = -fopenmp ?F90FLAGS?
-OPTC    = -fopenmp ?CFLAGS?  
+OPTF    = -O3 -fopenmp -fPIC
+OPTL    = -O3 -fopenmp -fPIC
+OPTC    = -O3 -fopenmp -fno-stack-protector -fPIC 
 #End Optimized options
  
 INCS = $(INCPAR)

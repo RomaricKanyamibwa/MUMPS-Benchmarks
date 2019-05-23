@@ -69,9 +69,9 @@ LIBOTHERS = -lpthread
 CDEFS   = -DAdd_
 
 #Begin Optimized options
-OPTF    = -nofor_main -DBLR_MT -qopenmp ?F90FLAGS? # or -openmp for old compilers
-OPTL    = -nofor_main -qopenmp ?F90FLAGS?
-OPTC    = -qopenmp ?CFLAGS?  
+OPTF    = -O3 -nofor_main -DBLR_MT -qopenmp -traceback -fPIC # or -openmp for old compilers
+OPTL    = -O3 -nofor_main -qopenmp -traceback -fPIC
+OPTC    = -O3 -qopenmp -traceback -fPIC
 #End Optimized options
  
 INCS = $(INCPAR)
