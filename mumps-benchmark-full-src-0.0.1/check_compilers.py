@@ -430,13 +430,13 @@ class GNU_COMPILER(CONFIGURE_COMPILER):
 
    def set_flags(self):
       """Set compiler options."""
-      self.cfg['CFLAGS'] = '-O2'
+      self.cfg['CFLAGS'] = '-03'
       flagsp = self.test_compil('CC', args='-fno-stack-protector')
       self.fcheck(flagsp, "CC (%s) supports '-fno-stack-protector' option" % self.cfg.get('CC', '?'))
       if flagsp:
          self.cfg['CFLAGS']     += ' -fno-stack-protector'
 
-      self.cfg['F90FLAGS'] = '-O2'
+      self.cfg['F90FLAGS'] = '-03'
       if self.fortran_supports_openmp:
          self.cfg['DEFINED']  += ' _USE_OPENMP'
          self.cfg['CFLAGS_OPENMP'] = '-fopenmp'
@@ -448,8 +448,8 @@ class GNU_COMPILER(CONFIGURE_COMPILER):
          self.cfg['F90FLAGS_I8'] = ' -fdefault-double-8 -fdefault-integer-8 -fdefault-real-8'
 
       self.insert_option('-fPIC')
-      self.cfg['CFLAGS_DBG']   = self.cfg['CFLAGS'].replace('-O2', '-g ')
-      self.cfg['F90FLAGS_DBG'] = self.cfg['F90FLAGS'].replace('-O2', '-g ')
+      self.cfg['CFLAGS_DBG']   = self.cfg['CFLAGS'].replace('-03', '-g ')
+      self.cfg['F90FLAGS_DBG'] = self.cfg['F90FLAGS'].replace('-03', '-g ')
 
       # test loc (GCC bug #51267 seen in 4.6.1)
       from check_compilers_src import gcc51267
@@ -618,7 +618,7 @@ class INTEL_COMPILER(CONFIGURE_COMPILER):
       self.cfg['DEFINED']  += '_USE_INTEL_IFORT _USE_OPENMP _DISABLE_MATHLIB_FPE'
       self.cfg['LDFLAGS']   = '-nofor_main'   # add -static-intel ?
       self.cfg['CFLAGS']    = '-O3 -traceback'
-      self.cfg['F90FLAGS']  = '-O3 -fpe0 -traceback'
+      self.cfg['F90FLAGS']  = '-O3 -fpe1 -traceback'
       self.cfg['CFLAGS_OPENMP'] = '-openmp'
       self.cfg['F90FLAGS_OPENMP'] = '-openmp'
       self.cfg['LDFLAGS_OPENMP'] = '-openmp'
@@ -656,8 +656,8 @@ class OPEN64_COMPILER(CONFIGURE_COMPILER):
 
    def set_flags(self):
       """Set compiler options."""
-      self.cfg['CFLAGS']     = '-O'
-      self.cfg['F90FLAGS']   = '-O'
+      self.cfg['CFLAGS']     = '-O3'
+      self.cfg['F90FLAGS']   = '-O3'
       if self.arch == 'x86_64':
          self.cfg['F90FLAGS_I8'] = ' -i8 -r8'
 

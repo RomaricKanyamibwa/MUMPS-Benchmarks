@@ -304,7 +304,7 @@ def setup_scotch(dep, summary, **kargs):
          # only if version >= 6
          version.startswith('5') and (None, None) or \
              ('Make',      {
-                'command': 'make scotch; make esmumps',
+                'command': 'make esmumps',
                 'path'   : osp.join('__setup.workdir__', '__setup.content__', 'src'),
                 'nbcpu'  : multiprocessing.cpu_count(),#1, # seems not support "-j NBCPU" option
              }),
@@ -393,7 +393,7 @@ def setup_ptscotch(dep, summary, **kargs):
          # only if version >= 6
          version.startswith('5') and (None, None) or \
              ('Make',      {
-                'command': 'make ptscotch; make ptesmumps',
+                'command': 'make ptesmumps',
                 'path'   : osp.join('__setup.workdir__', '__setup.content__', 'src'),
                 #'nbcpu'  : , # seems not support "-j NBCPU" option
              }),
@@ -465,7 +465,7 @@ def setup_mumps(dep, summary, **kargs):
             'dtrans'    : bench_cfg,
          }),
          ('Make'     , {
-            'command' : 'make all',
+            'command' : 'make alllib',
             'capturestderr' : False,
          }),
          ('Install',   {
@@ -473,7 +473,7 @@ def setup_mumps(dep, summary, **kargs):
             ,
             'capturestderr' : False,
          }),
-         # ('Clean',     {}),
+         ('Clean',     {}),
       ),
       clean_actions=(
          ('Configure', { # to force 'ld' temporarily to null
@@ -505,6 +505,13 @@ def setup_mumps_benchmark(dep, summary, **kargs):
    cfg['HOME_MUMPS_BENCH']=osp.join(cfg['ASTER_ROOT'], 'public', pkg_name)
 
    bench_cfg=benchcfg(cfg)
+   mode=cfg['make_extension'].split('.')
+
+   if 'SEQ' in mode:
+    instruct="mv dsimpletest_SEQ.F dsimpletest.F;cp Make/Makefile.in Makefile"
+   else:
+    instruct="cp Make/Makefile.in Makefile"
+
    # ----- setup instance
    setup=SETUP(
       product=product,
@@ -518,19 +525,23 @@ def setup_mumps_benchmark(dep, summary, **kargs):
       actions=(
          ('Extract'  , {}),
          ('Configure', {
-            'command':'cp Make/Makefile.in Makefile',
+            'command':instruct,
          }),
          ('ChgFiles',  {
             'files'     : ['Makefile'],
             'dtrans'    : bench_cfg,
          }),
          ('Install',   {
-            'command' : 'cp determinant_test aster_matrix_input *.F'
+            'command' : 'cp determinant_test aster_matrix_input dsimpletest.F'
             ' Makefile %(dest)s/'
             %{'dest':cfg['HOME_MUMPS_BENCH']} ,
             # 'capturestderr' : False,
          }),
          ('Clean',     {}),
+         ('Make'     , {
+            'path' : cfg['HOME_MUMPS_BENCH'] ,
+            'capturestderr' : False,
+         }),
       ),
       clean_actions=(
          ('Configure', { # to force 'ld' temporarily to null

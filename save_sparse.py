@@ -125,16 +125,18 @@ parser.add_argument("--RHS", dest="RHS",action="store_true",default=False,
     help="Generate and save Right Hand Side of Ax=b[default value False]")
 
 
-args = parser.parse_args()
+#-------------------------------------------------------------------------------
+if __name__ == '__main__':
+    args = parser.parse_args()
 
-n=m=args.N
-# matrixA=sparse.rand(n,m,density=args.density)
-# print(matrixA)
-if args.RHS :
-    save_sparse_matrix(args.filename,n,args.density,args.RHS)
-else:
-    save_sparse_matrix(args.filename,matrixA)
-loadfile=args.filename #'input_simpletest_real'#"aster_matrix_input"
+    n=m=args.N
+    # matrixA=sparse.rand(n,m,density=args.density)
+    # print(matrixA)
+    if args.RHS :
+        save_sparse_matrix(args.filename,n,args.density,args.RHS)
+    else:
+        save_sparse_matrix(args.filename,n,args.density)
+    loadfile=args.filename #'input_simpletest_real'#"aster_matrix_input"
 
-if args.load :
-    load_sparse_matrix(loadfile,args.RHS)#.tolil()
+    if args.load :
+        load_sparse_matrix(loadfile,args.RHS)#.tolil()

@@ -160,7 +160,7 @@ def main():
    parser.add_option("--noprompt", dest="noprompt", action='store_true',
          default=False,
          help=_("do not ask any questions"),)
-   parser.add_option("--parallel", dest="parallel", action='store_true',
+   parser.add_option("--par", dest="parallel", action='store_true',
          default=False,
          help=_("run on parallel mode"),)
 
@@ -296,15 +296,12 @@ def main():
    else:
       cfg['make_extension']=".INTEL"
 
-   # print("=================================================================================")
-   # print(cfg['PREFER_COMPILER'])
-   # print("=================================================================================")
-
    if parallel :
       cfg['make_extension']+=".PAR"
-      log._print(">>>>>>>>>>>>> Executing in Parallel mode.... <<<<<<<<<<<<<")
+      log._print(">>>>>>>>>>>>> Installing Parallel version of MUMPS.... <<<<<<<<<<<<<")
    else:
       cfg['make_extension']+=".SEQ"
+      log._print(">>>>>>>>>>>>> Installing Sequential version of MUMPS.... <<<<<<<<<<<<<")
       if 'ptscotch' in to_install:
          index=to_install.index("ptscotch")
          to_install[index]="scotch"
