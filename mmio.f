@@ -1,4 +1,4 @@
-      subroutine mmread(iunit,rep,field,symm,rows,cols,nnz,nnzmax,
+      subroutine mmread(iunit,rep,field,symm,rows,cols,nnz,
      *                 indx,jndx,ival,rval,cval)
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc      
 c
@@ -81,19 +81,20 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c
 c Declarations:
 c
-      integer ival(*)
-      double precision rval(*)
-      complex cval(*)
+      integer,DIMENSION(:),INTENT(INOUT)::ival
+      double precision,DIMENSION(:),INTENT(INOUT)::rval
+      complex,DIMENSION(:),INTENT(INOUT)::cval
       double precision rpart,ipart
-      integer indx(*)
-      integer jndx(*)
-      integer i, rows, cols, nnz, nnzreq, nnzmax, iunit
-      integer count
+      integer,DIMENSION(:),INTENT(INOUT)::indx
+      integer,DIMENSION(:),INTENT(INOUT)::jndx
+      integer,INTENT(IN):: iunit
+      integer ,INTENT(OUT)::rows, cols, nnz
+      integer count,i,nnzreq
       character mmhead*15
       character mmtype*6
-      character rep*10
-      character field*7
-      character symm*19
+      character,INTENT(OUT)::rep*10
+      character,INTENT(OUT)::field*7
+      character,INTENT(OUT)::symm*19
       character tmp1*1024
       character tmp2*2
 c
@@ -177,13 +178,13 @@ c
 c
 c Check to ensure adequate storage is available
 c
-        if ( nnz .gt. nnzmax ) then
-          print *,'insufficent array lengths for matrix of ',nnz,
-     *            ' nonzeros.' 
-          print *,'resize nnzmax to at least ',nnz,'. (currently ',
-     *            nnzmax,')'
-          stop
-        endif
+C         if ( nnz .gt. nnzmax ) then
+C           print *,'insufficent array lengths for matrix of ',nnz,
+C      *            ' nonzeros.' 
+C           print *,'resize nnzmax to at least ',nnz,'. (currently ',
+C      *            nnzmax,')'
+C           stop
+C         endif
 c
 c Read data according to data type (real,integer,complex, or pattern)
 c
@@ -229,13 +230,13 @@ c
           nnzreq = rows*cols
           nnz = nnzreq
         endif
-        if ( nnzreq .gt. nnzmax ) then
-          print *,'insufficent array length for ',rows, ' by ',
-     *             cols,' dense ',symm,' matrix.'
-          print *,'resize nnzmax to at least ',nnzreq,'. (currently ',
-     *             nnzmax,')'
-          stop
-        endif
+C         if ( nnzreq .gt. nnzmax ) then
+C           print *,'insufficent array length for ',rows, ' by ',
+C      *             cols,' dense ',symm,' matrix.'
+C           print *,'resize nnzmax to at least ',nnzreq,'. (currently ',
+C      *             nnzmax,')'
+C           stop
+C         endif
 c
 c Read data according to data type (real,integer,complex, or pattern)
 c
@@ -385,13 +386,14 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c
 c Declarations:
 c
-      integer i, rows, cols, nnz, iunit
-      integer count
-      character mmhead*14
+      integer,INTENT(IN):: iunit
+      integer ,INTENT(OUT)::rows, cols, nnz
+      integer count,i
+      character mmhead*15
       character mmtype*6
-      character rep*10
-      character field*7
-      character symm*19
+      character,INTENT(OUT)::rep*10
+      character,INTENT(OUT)::field*7
+      character,INTENT(OUT)::symm*19
       character tmp1*1024
       character tmp2*2
 c

@@ -6,84 +6,42 @@ topdir = ?HOME_MUMPS?
 libdir = $(topdir)/lib
 toplib = -L/usr/lib 
 
-default: d
+default: mmio
 
-.PHONY: default all s
+.PHONY: default all mmio
 .SECONDEXPANSION:
 
-all:	d
+all:	mmio
 
-c:	csimpletest 
-z:	zsimpletest 
-s:	ssimpletest 
-d:	dsimpletest
-seq:dsimpletest_SEQ
-cex: c_example
-multi:	multiple_arithmetics_example
+d: dsimpletest
+m: mmio
 
 
 include $(topdir)/Makefile.inc
 
 LIBMUMPS_COMMON = $(libdir)/libmumps_common$(PLAT)$(LIBEXT)
 
-
-LIBSMUMPS = $(libdir)/libsmumps$(PLAT)$(LIBEXT) $(LIBMUMPS_COMMON)
-
-ssimpletest:  $(LIBSMUMPS)  $$@.o
-	$(FL) -o $@ $(OPTL) ssimpletest.o  $(LIBSMUMPS) $(LIBDMUMPS) $(LIBCMUMPS) $(LIBZMUMPS) $(LORDERINGS) $(LIBS) $(LIBBLAS) $(LIBOTHERS)
-
+mmio: $$@.o dsimpletest
 
 LIBDMUMPS = $(libdir)/libdmumps$(PLAT)$(LIBEXT) $(LIBMUMPS_COMMON)
 
 dsimpletest: $(LIBDMUMPS)  $$@.o 
-	$(FL) -o $@ $(OPTL) dsimpletest.o  $(LIBDMUMPS) $(LORDERINGS) $(LIBS) $(LIBBLAS) $(LIBOTHERS)
+	$(FL) -o $@ $(OPTL) dsimpletest.o mmio.o  $(LIBDMUMPS) $(LORDERINGS) $(LIBS) $(LIBBLAS) $(LIBOTHERS) -g
 
 
-LIBCMUMPS = $(libdir)/libcmumps$(PLAT)$(LIBEXT) $(LIBMUMPS_COMMON)
-
-dsimpletest_SEQ: $(LIBDMUMPS)  $$@.o 
-	$(FL) -o $@ $(OPTL) dsimpletest_SEQ.o  $(LIBDMUMPS) $(LORDERINGS) $(LIBS) $(LIBBLAS) $(LIBOTHERS)
-
-
-csimpletest: $(LIBCMUMPS)  $$@.o
-	$(FL) -o $@ $(OPTL) csimpletest.o  $(LIBCMUMPS) $(LORDERINGS) $(LIBS) $(LIBBLAS) $(LIBOTHERS)
-
-
-LIBZMUMPS = $(libdir)/libzmumps$(PLAT)$(LIBEXT) $(LIBMUMPS_COMMON)
-
-zsimpletest: $(LIBZMUMPS)  $$@.o
-	$(FL) -o $@ $(OPTL) zsimpletest.o  $(LIBZMUMPS) $(LORDERINGS) $(LIBS) $(LIBBLAS) $(LIBOTHERS)
-
-c_example:	$(LIBDMUMPS) $$@.o
-	$(FL) -o $@ $(OPTL) $@.o $(LIBDMUMPS) $(LORDERINGS) $(LIBS) $(LIBBLAS) $(LIBOTHERS)
-
-
-multiple_arithmetics_example:	$(LIBSMUMPS) $(LIBDMUMPS) $(LIBCMUMPS) $(LIBZMUMPS) $$@.o
-	$(FL) -o $@ $(OPTL) $@.o $(LIBSMUMPS) $(LIBDMUMPS) $(LIBCMUMPS) $(LIBZMUMPS) $(LORDERINGS) $(LIBS) $(LIBBLAS) $(LIBOTHERS)
-
-
-.SUFFIXES: .c .F .o
+.SUFFIXES: .c .F .o .f
 .F.o:
-	$(FC) $(OPTF) $(INCS) -I. -I$(topdir)/include -c $*.F $(OUTF)$*.o
+	$(FC) $(OPTF) $(INCS) -I. -I$(topdir)/include -c $*.F $(OUTF)$*.o -g
+.f.o:
+	$(FC) $(OPTF) $(INCS) -I. -I$(topdir)/include -c $*.f $(OUTF)$*.o -g
 .c.o:
-	$(CC) $(OPTC) $(INCS) $(CDEFS) -I. -I$(topdir)/include -I$(topdir)/src -c $*.c $(OUTC)$*.o
+	$(CC) $(OPTC) $(INCS) $(CDEFS) -I. -I$(topdir)/include -I$(topdir)/src -c $*.c $(OUTC)$*.o -g
 
-
-$(libdir)/libsmumps$(PLAT)$(LIBEXT):
-	@echo 'Error: you should build the library' $@ 'first'
-	exit 1
 
 $(libdir)/libdmumps$(PLAT)$(LIBEXT):
 	@echo 'Error: you should build the library' $@ 'first'
 	exit 1
 
-$(libdir)/libcmumps$(PLAT)$(LIBEXT):
-	@echo 'Error: you should build the library' $@ 'first'
-	exit 1
-
-$(libdir)/libzmumps$(PLAT)$(LIBEXT):
-	@echo 'Error: you should build the library' $@ 'first'
-	exit 1
 
 $(LIBMUMPS_COMMON):
 	@echo 'Error: you should build the library' $@ 'first'

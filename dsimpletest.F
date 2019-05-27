@@ -9,15 +9,49 @@ C
       TYPE (DMUMPS_STRUC) mumps_par
 
       INTERFACE 
-        SUBROUTINE readargs(typefile,filename)
+        SUBROUTINE readargs(typefile,filename,RHS)
 
-          CHARACTER(len=60),INTENT(OUT)  :: filename
+          CHARACTER(len=120),INTENT(OUT)  :: filename,RHS
           INTEGER,INTENT(OUT)  :: typefile
-          CHARACTER(len=60)  :: arg
+          CHARACTER(len=120) :: arg
           INTEGER :: cpt,nb_arg
 
-
         END SUBROUTINE readargs
+
+        SUBROUTINE mmread(iunit,rep,field,symm,rows,cols,nnz,
+     *                 indx,jndx,ival,rval,cval)
+
+          integer,DIMENSION(:),INTENT(INOUT)::ival
+          double precision,DIMENSION(:),INTENT(INOUT)::rval
+          complex,DIMENSION(:),INTENT(INOUT)::cval
+          double precision rpart,ipart
+          integer,DIMENSION(:),INTENT(INOUT)::indx
+          integer,DIMENSION(:),INTENT(INOUT)::jndx
+          integer,INTENT(IN):: iunit
+          integer ,INTENT(OUT)::rows, cols, nnz
+          integer count,i,nnzreq
+          character mmhead*15
+          character mmtype*6
+          character,INTENT(OUT)::rep*10
+          character,INTENT(OUT)::field*7
+          character,INTENT(OUT)::symm*19
+          character tmp1*1024
+          character tmp2*2
+        END SUBROUTINE
+
+        SUBROUTINE mminfo(iunit,rep,field,symm,rows,cols,nnz)
+          integer,INTENT(IN):: iunit
+          integer ,INTENT(OUT)::rows, cols, nnz
+          integer count,i
+          character mmhead*15
+          character mmtype*6
+          character,INTENT(OUT)::rep*10
+          character,INTENT(OUT)::field*7
+          character,INTENT(OUT)::symm*19
+          character tmp1*1024
+          character tmp2*2
+        END SUBROUTINE
+
       END INTERFACE
 
       INTEGER IERR, I,index
@@ -32,7 +66,23 @@ C     Reduce variables
 
 C       input arguments
       INTEGER typefile
-      CHARACTER(len=60) filename
+      CHARACTER(len=120) filename,RHS
+
+C       mmio variables
+C       INTEGER nnzmax
+      INTEGER iunit
+      CHARACTER rep*10
+      CHARACTER field*7
+      CHARACTER symm*19
+      CHARACTER ifile*32,ofile*32
+C       PARAMETER (nnzmax=5000000)
+      INTEGER,ALLOCATABLE :: ival(:)
+      DOUBLE PRECISION,ALLOCATABLE :: rval(:)
+      COMPLEX,ALLOCATABLE :: cval(:)
+      INTEGER,ALLOCATABLE :: indx(:)
+      INTEGER,ALLOCATABLE :: jndx(:)
+      INTEGER :: ncols,nnz,nrows
+c
 
       CALL MPI_INIT(IERR)
 C Define a communicator for the package.
@@ -63,36 +113,103 @@ C  Define problem on the host (processor 0)
 
         typefile=1
         filename="aster_matrix_input"
-        call readargs(typefile,filename)
+        RHS=""
+        call readargs(typefile,filename,RHS)
 
-C         OPEN(unit=8,FILE="aster_matrix_input")
-        OPEN(unit=8,FILE=filename)
+        iunit = 8
+        OPEN(unit=iunit,FILE=filename)
+        IF ( typefile .eq. 3) THEN
+          print*,"HEHEHE"
+          print *,'Reading header and data...'
+          call mminfo(iunit,rep,field,symm,nrows,ncols,nnz)
+          if( rep .ne. 'array' ) then
+            ALLOCATE(indx(nnz))
+            ALLOCATE(jndx(nnz))
+          endif
 
-        READ(8,*) mumps_par%N
-        READ(8,*) mumps_par%NNZ
-        print*,"N=",mumps_par%N," NNZ=",mumps_par%NNZ
-        ALLOCATE( mumps_par%IRN ( mumps_par%NNZ ) )
-        ALLOCATE( mumps_par%JCN ( mumps_par%NNZ ) )
-        ALLOCATE( mumps_par%A( mumps_par%NNZ ) )
-        ALLOCATE( mumps_par%RHS ( mumps_par%N  ) )
+          if ( field .eq. 'integer' ) then
+            ALLOCATE(ival(nnz))
+          elseif ( field .eq. 'real') then
+            ALLOCATE(rval(nnz))
+          elseif ( field .eq. 'complex' ) then
+            ALLOCATE(cval(nnz))
+          endif
 
-        DO I8 = 1, mumps_par%NNZ
-          READ(8,*) mumps_par%IRN(I8),mumps_par%JCN(I8),mumps_par%A(I8)
+C           print*,"END Allocation"
+          call mmread(iunit,rep,field,symm,nrows,ncols,nnz,
+     *           indx,jndx,ival,rval,cval)
+          print *,'  Matrix is type: ',rep,' ',field,' ',symm
+          print *,'  Matrix size: ',nrows,' by ',ncols,' with ',
+     *                          nnz,' nonzeros.'
 
-        END DO
-        DO I = 1, mumps_par%N
-          IF (typefile .eq. 1) THEN
-            READ(8,*)index,mumps_par%RHS(I)
-          ELSE
-              READ(8,*)mumps_par%RHS(I)!for test input matrix
-          END IF
-          
-        END DO
-        CLOSE(8)
+          mumps_par%N=nrows
+          mumps_par%NNZ=nnz
+
+          ALLOCATE( mumps_par%IRN ( mumps_par%NNZ ) )
+          ALLOCATE( mumps_par%JCN ( mumps_par%NNZ ) )
+          ALLOCATE( mumps_par%A( mumps_par%NNZ ) )
+          ALLOCATE( mumps_par%RHS ( mumps_par%N  ) )
+
+          mumps_par%IRN(:)=indx(:)
+          mumps_par%JCN(:)=jndx(:)
+          mumps_par%A=rval
+
+          IF ((RHS .EQ. "") .OR. (len(RHS) .LE. 0)) THEN
+            print*,"ERROR:Expected option --RHS"
+            GOTO 500
+          END IF 
+
+          CLOSE(iunit)
+          OPEN(unit=9,FILE=RHS)
+          print *,'Reading RHS header and data...'
+          call mmread(9,rep,field,symm,nrows,ncols,nnz,
+     *           indx,jndx,ival,rval,cval)
+          print *,'  Matrix is type: ',rep,' ',field,' ',symm
+          print *,'  RHS size: ',nrows,' by ',ncols
+
+          if( rep .ne. 'array' ) then
+            print*,"ERROR:Expected array type matrix"
+            GOTO 500
+          endif
+
+          mumps_par%RHS=rval(1:nrows)
+          CLOSE(9)
+
+        ELSE IF ( typefile .eq. 4) THEN
+          print*,"HOHOHO"
+          CLOSE(8)
+          GOTO 500
+        ELSE
+
+          READ(8,*) mumps_par%N
+          READ(8,*) mumps_par%NNZ
+          print*,"N=",mumps_par%N," NNZ=",mumps_par%NNZ
+          ALLOCATE( mumps_par%IRN ( mumps_par%NNZ ) )
+          ALLOCATE( mumps_par%JCN ( mumps_par%NNZ ) )
+          ALLOCATE( mumps_par%A( mumps_par%NNZ ) )
+          ALLOCATE( mumps_par%RHS ( mumps_par%N  ) )
+
+          DO I8 = 1, mumps_par%NNZ
+            READ(8,*) mumps_par%IRN(I8),mumps_par%JCN(I8),
+     &      mumps_par%A(I8)
+
+          END DO
+          DO I = 1, mumps_par%N
+            IF (typefile .eq. 1) THEN
+              READ(8,*)index,mumps_par%RHS(I)
+            ELSE
+                READ(8,*)mumps_par%RHS(I)!for test input matrix
+            END IF
+            
+          END DO
+        
+        CLOSE(8) 
+        END IF
+        
 
       END IF
 
-C       print*,"-----     End  of problem definition      -----"
+      print*,"-----     End  of problem definition      -----"
 C  Call package for solution
       mumps_par%ICNTL(33)=1
       mumps_par%JOB = 6
@@ -155,6 +272,20 @@ C         print*,"mumps_par%INFOG(34):",mumps_par%INFOG(34)
         DEALLOCATE( mumps_par%JCN )
         DEALLOCATE( mumps_par%A   )
         DEALLOCATE( mumps_par%RHS )
+
+        IF( rep .ne. 'array' ) THEN
+            DEALLOCATE(indx)
+            DEALLOCATE(jndx)
+        ENDIF
+
+        if ( field .eq. 'integer' ) then
+          DEALLOCATE(ival)
+        elseif ( field .eq. 'real') then
+          DEALLOCATE(rval)
+        elseif ( field .eq. 'complex' ) then
+          DEALLOCATE(cval)
+        endif
+
       END IF
 C  Destroy the instance (deallocate internal data structures)
       mumps_par%JOB = -2
@@ -170,12 +301,13 @@ C  Destroy the instance (deallocate internal data structures)
       END
 
 
-      SUBROUTINE readargs(typefile,filename)
+      SUBROUTINE readargs(typefile,filename,RHS)
 
-        CHARACTER(len=60),INTENT(OUT)  :: filename
+        CHARACTER(len=120),INTENT(OUT)  :: filename,RHS
         INTEGER,INTENT(OUT)  :: typefile
-        CHARACTER(len=60) :: arg
+        CHARACTER(len=120) :: arg
         INTEGER :: cpt,nb_arg
+        LOGICAL :: file_exists
 
         nb_arg=iargc()
         cpt=1
@@ -192,12 +324,32 @@ C                 print*,"HELP"
                 cpt=cpt+1
                 call getarg(cpt,arg)
                 read(arg,*)filename
-                print*,"Filename=",filename
+
+                INQUIRE(FILE=filename, EXIST=file_exists)
+                IF (file_exists .EQV. .FALSE.) THEN
+                  print*,'ERROR:Problem with File => ',filename
+                  STOP
+                END IF 
+
+                print*,'Filename=',filename
             case ('-t','--type')
                 cpt=cpt+1
                 call getarg(cpt,arg)
                 read(arg,*)typefile
                 print*,'FileType=',typefile
+
+            case ('--RHS')
+                cpt=cpt+1
+                call getarg(cpt,arg)
+                read(arg,*)RHS
+
+                INQUIRE(FILE=RHS, EXIST=file_exists)
+                IF (file_exists .EQV. .FALSE.) THEN
+                  print*,'ERROR:Problem with File => ',RHS
+                  STOP
+                END IF
+
+                print*,'RHS=',RHS
             case default
                 print '(a,a,/)','Unrecognized command-line option:'
                 call print_help()
@@ -216,7 +368,8 @@ C                 print*,"HELP"
           print  '(a)','cmdline options:'
           print  '(a)',''
           print  '(a)','  -f          Filename'
-          print  '(a)','  -t          Typefile [1,2]'
+          print  '(a)','  --RHS       RHS Filename (needed for type 3)'
+          print  '(a)','  -t          Typefile [|1,4|]'
           print  '(a)','  -h, --help  print usage information and exit'
         end subroutine print_help
 
