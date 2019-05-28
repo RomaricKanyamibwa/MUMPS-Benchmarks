@@ -176,7 +176,8 @@ C           print*,"END Allocation"
           CLOSE(9)
 
         ELSE IF ( typefile .eq. 4) THEN
-          print*,"HOHOHO"
+          print*,"ERROR:Unimplemented Harwell-Boeing Exchange Format"
+          print*,"Exiting...."
           CLOSE(8)
           GOTO 500
         ELSE
