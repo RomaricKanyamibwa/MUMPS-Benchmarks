@@ -119,7 +119,6 @@ C  Define problem on the host (processor 0)
         iunit = 8
         OPEN(unit=iunit,FILE=filename)
         IF ( typefile .eq. 3) THEN
-          print*,"HEHEHE"
           print *,'Reading header and data...'
           call mminfo(iunit,rep,field,symm,nrows,ncols,nnz)
           if( rep .ne. 'array' ) then
@@ -210,7 +209,7 @@ C           print*,"END Allocation"
 
       END IF
 
-      print*,"-----     End  of problem definition      -----"
+C       print*,"-----     End  of problem definition      -----"
 C  Call package for solution
       mumps_par%ICNTL(33)=1
       mumps_par%JOB = 6
@@ -238,10 +237,6 @@ C         WRITE( 6, * ) ' Solution is ',(mumps_par%RHS(I),I=1,mumps_par%N)
         
 
       END IF
-
-      CALL MPI_REDUCE(mumps_par%RINFO,gflops_step, 3, MPI_DOUBLE,
-     &      MPI_SUM, 0, mumps_par%COMM, ierr) 
-
 
 C  Deallocate user data
       IF ( mumps_par%MYID .eq. 0 )THEN
@@ -277,7 +272,7 @@ C         print*,"mumps_par%INFOG(34):",mumps_par%INFOG(34)
         DEALLOCATE( mumps_par%JCN )
         DEALLOCATE( mumps_par%A   )
         DEALLOCATE( mumps_par%RHS )
-        
+
         IF( rep .ne. 'array' ) THEN
             DEALLOCATE(indx)
             DEALLOCATE(jndx)

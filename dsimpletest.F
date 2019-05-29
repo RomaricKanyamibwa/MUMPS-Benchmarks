@@ -119,7 +119,6 @@ C  Define problem on the host (processor 0)
         iunit = 8
         OPEN(unit=iunit,FILE=filename)
         IF ( typefile .eq. 3) THEN
-          print*,"HEHEHE"
           print *,'Reading header and data...'
           call mminfo(iunit,rep,field,symm,nrows,ncols,nnz)
           if( rep .ne. 'array' ) then
@@ -210,7 +209,7 @@ C           print*,"END Allocation"
 
       END IF
 
-      print*,"-----     End  of problem definition      -----"
+C       print*,"-----     End  of problem definition      -----"
 C  Call package for solution
       mumps_par%ICNTL(33)=1
       mumps_par%JOB = 6
@@ -230,21 +229,21 @@ C         WRITE( 6, * ) ' Solution is ',(mumps_par%RHS(I),I=1,mumps_par%N)
 
         print*,""
         print*,"------------------------------------------------------"
-        print*,"RINFO(1):",mumps_par%RINFO(1)
-        print*,"RINFO(2):",mumps_par%RINFO(2)
-        print*,"RINFO(3):",mumps_par%RINFO(3)
+        print*,"RINFOG(1):",mumps_par%RINFOG(1)
+        print*,"RINFOG(2):",mumps_par%RINFOG(2)
+        print*,"RINFOG(3):",mumps_par%RINFOG(3)
         print*,"------------------------------------------------------"
         print*,""
         
 
       END IF
 
-      CALL MPI_REDUCE(mumps_par%RINFO,gflops_step, 3, MPI_DOUBLE,
-     &      MPI_SUM, 0, mumps_par%COMM, ierr) 
-
 
 C  Deallocate user data
       IF ( mumps_par%MYID .eq. 0 )THEN
+        gflops_step(1)=mumps_par%RINFOG(1)
+        gflops_step(2)=mumps_par%RINFOG(2)
+        gflops_step(3)=mumps_par%RINFOG(3)
 
         elapsed_time=real (t2-t1)
      &   /real(clock_rate)
@@ -274,18 +273,20 @@ C         print*,"mumps_par%INFOG(34):",mumps_par%INFOG(34)
         DEALLOCATE( mumps_par%A   )
         DEALLOCATE( mumps_par%RHS )
 
-        IF( rep .ne. 'array' ) THEN
-            DEALLOCATE(indx)
-            DEALLOCATE(jndx)
-        ENDIF
+        IF ( typefile .eq. 3) THEN
+          IF( rep .ne. 'array' ) THEN
+              DEALLOCATE(indx)
+              DEALLOCATE(jndx)
+          ENDIF
 
-        if ( field .eq. 'integer' ) then
-          DEALLOCATE(ival)
-        elseif ( field .eq. 'real') then
-          DEALLOCATE(rval)
-        elseif ( field .eq. 'complex' ) then
-          DEALLOCATE(cval)
-        endif
+          if ( field .eq. 'integer' ) then
+            DEALLOCATE(ival)
+          elseif ( field .eq. 'real') then
+            DEALLOCATE(rval)
+          elseif ( field .eq. 'complex' ) then
+            DEALLOCATE(cval)
+          endif
+        ENDIF
 
       END IF
 C  Destroy the instance (deallocate internal data structures)

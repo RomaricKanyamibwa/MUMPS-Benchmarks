@@ -507,10 +507,7 @@ def setup_mumps_benchmark(dep, summary, **kargs):
    bench_cfg=benchcfg(cfg)
    mode=cfg['make_extension'].split('.')
 
-   if 'SEQ' in mode:
-    instruct="mv dsimpletest_SEQ.F dsimpletest.F;cp Make/Makefile.in Makefile"
-   else:
-    instruct="cp Make/Makefile.in Makefile"
+   instruct="cp Make/Makefile.in Makefile"
 
    # ----- setup instance
    setup=SETUP(
