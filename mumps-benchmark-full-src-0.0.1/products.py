@@ -505,8 +505,6 @@ def setup_mumps_benchmark(dep, summary, **kargs):
    cfg['HOME_MUMPS_BENCH']=osp.join(cfg['ASTER_ROOT'], 'public', pkg_name)
 
    bench_cfg=benchcfg(cfg)
-   mode=cfg['make_extension'].split('.')
-
    instruct="cp Make/Makefile.in Makefile"
 
    # ----- setup instance
@@ -529,7 +527,7 @@ def setup_mumps_benchmark(dep, summary, **kargs):
             'dtrans'    : bench_cfg,
          }),
          ('Install',   {
-            'command' : 'cp determinant_test aster_matrix_input dsimpletest.F'
+            'command' : 'cp determinant_test aster_matrix_input dsimpletest.F *.f'
             ' Makefile %(dest)s/'
             %{'dest':cfg['HOME_MUMPS_BENCH']} ,
             # 'capturestderr' : False,

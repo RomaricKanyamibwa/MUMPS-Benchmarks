@@ -118,6 +118,7 @@ C  Define problem on the host (processor 0)
 
         iunit = 8
         OPEN(unit=iunit,FILE=filename)
+C       Reading Matrix Market Exchange Formats
         IF ( typefile .eq. 3) THEN
           print *,'Reading header and data...'
           call mminfo(iunit,rep,field,symm,nrows,ncols,nnz)
@@ -174,6 +175,7 @@ C           print*,"END Allocation"
           mumps_par%RHS=rval(1:nrows)
           CLOSE(9)
 
+C       Reading Harwell-Boeing Exchange Format
         ELSE IF ( typefile .eq. 4) THEN
           print*,"ERROR:Unimplemented Harwell-Boeing Exchange Format"
           print*,"Exiting...."
@@ -225,21 +227,13 @@ C  Call package for solution
       END IF
 C  Solution has been assembled on the host
       IF ( mumps_par%MYID .eq. 0 ) THEN
-C         WRITE( 6, * ) ' Solution is ',(mumps_par%RHS(I),I=1,mumps_par%N)
-
-        print*,""
-        print*,"------------------------------------------------------"
-        print*,"RINFOG(1):",mumps_par%RINFOG(1)
-        print*,"RINFOG(2):",mumps_par%RINFOG(2)
-        print*,"RINFOG(3):",mumps_par%RINFOG(3)
-        print*,"------------------------------------------------------"
-        print*,""
-        
-
+        print*,'------------------------------------------------------'
+        WRITE( 6, * )'Solution is ',(mumps_par%RHS(I),I=1,5),'....'
+        print*,'------------------------------------------------------'
       END IF
 
 
-C  Deallocate user data
+C  Deallocate user data and calculate overall performance
       IF ( mumps_par%MYID .eq. 0 )THEN
         gflops_step(1)=mumps_par%RINFOG(1)
         gflops_step(2)=mumps_par%RINFOG(2)
@@ -247,15 +241,12 @@ C  Deallocate user data
 
         elapsed_time=real (t2-t1)
      &   /real(clock_rate)
-C         elapsed_time=stop_time-start_time
         WRITE(6,'(A,F8.3,A)')" Resolution time:",elapsed_time,"sec"
 
         print*,"Analysis:",gflops_step(1)/Giga,"Gflops"
         print*,"Factorization:",gflops_step(2)/Giga,"Gflops"
         print*,"Resolution:",gflops_step(3)/Giga,"Gflops"
         determ=(mumps_par%RINFOG(12))*2.0**mumps_par%INFOG(34)
-C         print*,"mumps_par%RINFOG(12):",mumps_par%RINFOG(12)
-C         print*,"mumps_par%INFOG(34):",mumps_par%INFOG(34)
         print*,"Determinant:",determ
         str_fin="               #"
 
@@ -305,6 +296,7 @@ C  Destroy the instance (deallocate internal data structures)
 
       SUBROUTINE readargs(typefile,filename,RHS)
 
+        IMPLICIT NONE
         CHARACTER(len=120),INTENT(OUT)  :: filename,RHS
         INTEGER,INTENT(OUT)  :: typefile
         CHARACTER(len=120) :: arg
