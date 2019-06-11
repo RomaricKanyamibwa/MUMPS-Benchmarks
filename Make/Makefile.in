@@ -48,4 +48,4 @@ $(LIBMUMPS_COMMON):
 	exit 1
 
 clean:
-	$(RM) *.o [sdcz]simpletest c_example multiple_arithmetics_example     
+	$(RM) *.o [sdcz]simpletest 

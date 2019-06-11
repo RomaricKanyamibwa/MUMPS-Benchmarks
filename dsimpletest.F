@@ -318,14 +318,6 @@ C                 print*,"HELP"
                 cpt=cpt+1
                 call getarg(cpt,arg)
                 read(arg,*)filename
-
-                INQUIRE(FILE=filename, EXIST=file_exists)
-                IF (file_exists .EQV. .FALSE.) THEN
-                  print*,'ERROR:Problem with File => ',filename
-                  STOP
-                END IF 
-
-                print*,'Filename=',filename
             case ('-t','--type')
                 cpt=cpt+1
                 call getarg(cpt,arg)
@@ -339,11 +331,11 @@ C                 print*,"HELP"
 
                 INQUIRE(FILE=RHS, EXIST=file_exists)
                 IF (file_exists .EQV. .FALSE.) THEN
-                  print*,'ERROR:Problem with File => ',RHS
+                  print*,'RHS=',RHS
+                  print*,'ERROR:File does not exist.'
                   STOP
                 END IF
 
-                print*,'RHS=',RHS
             case default
                 print '(a,a,/)','Unrecognized command-line option:'
                 call print_help()
@@ -351,6 +343,13 @@ C                 print*,"HELP"
         end select
         cpt=cpt+1
       end do
+
+      INQUIRE(FILE=filename, EXIST=file_exists)
+      IF (file_exists .EQV. .FALSE.) THEN
+        print*,'Filename=',filename
+        print*,'ERROR:File does not exist.'
+        STOP
+      END IF 
 
       contains
         subroutine print_help()

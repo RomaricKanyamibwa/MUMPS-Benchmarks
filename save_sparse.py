@@ -28,8 +28,11 @@ import scipy.io
 import multiprocessing
 import numpy as np
 from argparse import ArgumentParser
+import time
 
 def save_sparse_matrix(filename,n,density, rhs=False):
+    start_time = time.time()
+    print("Generating Sparse matrix......")
     x=sparse.rand(n,n,density=density)
     x_coo = x.tocoo()
     NNZ = x.nnz#int(n*n*density)
@@ -44,6 +47,7 @@ def save_sparse_matrix(filename,n,density, rhs=False):
 
         file.write(str(n)+"\n")
         file.write(str(NNZ))
+        print('Saving Generated Sparse matrix...')
 
         for i in range(NNZ):#we add 1 so we can be comptatible with MUMPS/Fortran indexing that starts at 1
             tmp="\n"+str(row[i]+1)+"\t"+str(col[i]+1)+"\t"+str(data[i])
@@ -57,8 +61,23 @@ def save_sparse_matrix(filename,n,density, rhs=False):
                 file.write(tmp)
 
         file.write("\n")
+        elapsed_time = time.time() - start_time
+        str_time="# Sparse File Generation time:"+str(elapsed_time)+"s #"
+        seperators="#"
+        empty_sep ="#"
+        for k in range(len(str_time)-2):
+            seperators+="#"
+            empty_sep +=" "
+        seperators+="#"
+        empty_sep +="#"
 
-    # np.savez(filename, row=row, col=col, data=data, shape=shape)
+        print(seperators)
+        print(empty_sep)
+        print(str_time)
+        print(empty_sep)
+        print(seperators)
+
+
 
 def load_sparse_matrix(filename, rhs=False):
 
@@ -98,11 +117,6 @@ def load_sparse_matrix(filename, rhs=False):
 
     print(y)
     return M
-
-# N=20000
-# x = sparse.lil_matrix( (N,N) )
-# for i in xrange(N):
-#     x[random.randint(0,N-1),random.randint(0,N-1)]=random.randint(1,100)
 
 parser = ArgumentParser()
 

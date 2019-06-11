@@ -112,7 +112,7 @@ def setup_metis(dep, summary, **kargs):
      } ),
      ('Extract'  , {}),
      ('Configure', {
-        'command': 'make config prefix=%(dest)s openmp=openmp' % { 'dest' : cfg['HOME_METIS'] },
+        'command': 'make -j 4 config prefix=%(dest)s openmp=openmp' % { 'dest' : cfg['HOME_METIS'] },
      }),
      ('Make'     , { 'nbcpu' : max(multiprocessing.cpu_count(),kargs['find_tools'].nbcpu) }),
      ('Install'  , {}),
@@ -133,7 +133,7 @@ def setup_metis(dep, summary, **kargs):
          }),
          ('Make'     , { 'nbcpu' : max(multiprocessing.cpu_count(),kargs['find_tools'].nbcpu) }),
          ('Install'  , {
-            'command'   : 'make install prefix=%(dest)s ; ' \
+            'command'   : 'make -j 8 install prefix=%(dest)s ; ' \
                           'cp Makefile.in %(dest)s' \
                % { 'dest' : cfg['HOME_METIS'] },
          }),
@@ -184,7 +184,7 @@ def setup_parmetis(dep, summary, **kargs):
      } ),
      ('Extract'  , {}),
      ('Configure', {
-        'command': 'make config prefix=%(dest)s' % { 'dest' : cfg['HOME_METIS'] },
+        'command': 'make -j 8 config prefix=%(dest)s' % { 'dest' : cfg['HOME_METIS'] },
      }),
      ('Make'     , { 'nbcpu' : max(multiprocessing.cpu_count(),kargs['find_tools'].nbcpu) }),
      ('Install'  , {}),
@@ -306,7 +306,7 @@ def setup_scotch(dep, summary, **kargs):
              ('Make',      {
                 'command': 'make esmumps',
                 'path'   : osp.join('__setup.workdir__', '__setup.content__', 'src'),
-                'nbcpu'  : multiprocessing.cpu_count(),#1, # seems not support "-j NBCPU" option
+                # 'nbcpu'  : multiprocessing.cpu_count(),#1, # seems not support "-j NBCPU" option
              }),
          ('Install',   {'command' : 'make install prefix=%s' % cfg['HOME_SCOTCH'],
                         'path'    : osp.join('__setup.workdir__', '__setup.content__', 'src') }),
@@ -388,14 +388,14 @@ def setup_ptscotch(dep, summary, **kargs):
             }),
          ('Make',      {
             'path'   : osp.join('__setup.workdir__', '__setup.content__', 'src'),
-            'nbcpu'  : 1, # seems not support "-j NBCPU" option
+            'nbcpu'  : 2, # seems not support "-j NBCPU" option
          }),
          # only if version >= 6
          version.startswith('5') and (None, None) or \
              ('Make',      {
                 'command': 'make ptesmumps',
                 'path'   : osp.join('__setup.workdir__', '__setup.content__', 'src'),
-                #'nbcpu'  : , # seems not support "-j NBCPU" option
+                # 'nbcpu'  : 8, # seems not support "-j NBCPU" option
              }),
          ('Install',   {'command' : 'make install prefix=%s' % cfg['HOME_SCOTCH'],
                         'path'    : osp.join('__setup.workdir__', '__setup.content__', 'src') }),
@@ -430,8 +430,7 @@ def setup_mumps(dep, summary, **kargs):
    pkg_name = '%s-%s' % (product, version)
    # ----- add (and check) product dependencies
    dep.Add(product,
-      req=['ASTER_ROOT', 'CC', 'F90', 'LD', 'INCLUDE_MUMPS', 'MATHLIB', 'OTHERLIB',
-           'HOME_METIS', 'HOME_SCOTCH'],
+      req=['ASTER_ROOT', 'CC', 'F90', 'LD', 'INCLUDE_MUMPS', 'MATHLIB', 'OTHERLIB'],
       set=['HOME_MUMPS',],
    )
    cfg['HOME_MUMPS']=osp.join(cfg['ASTER_ROOT'], 'public', pkg_name)
@@ -465,7 +464,7 @@ def setup_mumps(dep, summary, **kargs):
             'dtrans'    : bench_cfg,
          }),
          ('Make'     , {
-            'command' : 'make alllib',
+            'command' : 'make -j 8 alllib',
             'capturestderr' : False,
          }),
          ('Install',   {
@@ -499,7 +498,7 @@ def setup_mumps_benchmark(dep, summary, **kargs):
    # ----- add (and check) product dependencies
    dep.Add(product,
       req=['ASTER_ROOT', 'CC', 'F90', 'LD', 'INCLUDE_MUMPS', 'MATHLIB', 'OTHERLIB',
-           'HOME_METIS', 'HOME_SCOTCH','HOME_MPI','HOME_MUMPS'],
+           'HOME_MPI','HOME_MUMPS'],
       set=['HOME_MUMPS_BENCH',],
    )
    cfg['HOME_MUMPS_BENCH']=osp.join(cfg['ASTER_ROOT'], 'public', pkg_name)
@@ -527,8 +526,8 @@ def setup_mumps_benchmark(dep, summary, **kargs):
             'dtrans'    : bench_cfg,
          }),
          ('Install',   {
-            'command' : 'cp determinant_test aster_matrix_input dsimpletest.F *.f'
-            ' Makefile %(dest)s/'
+            'command' : 'cp aster_matrix_input dsimpletest.F *.f '
+            'save_sparse.py Makefile %(dest)s/'
             %{'dest':cfg['HOME_MUMPS_BENCH']} ,
             # 'capturestderr' : False,
          }),
