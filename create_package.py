@@ -37,13 +37,11 @@ log_file = 'create_package.log'
 
 python_version    = '.'.join([str(n) for n in sys.version_info[:3]])
 
-to_install=['scotch','metis','parmetis','mumps','mumps_benchmark']
 
-
-usage="usage: python %prog [options] [install|test] [arg]\n" + \
+usage="usage: python %prog [options] [clean]\n" + \
    _("""
 
-   Setup script for MUMPS Benchmarks distribution.
+   Packaging script for MUMPS Benchmark distribution.
 
    NOTE : MUMPS Benchmarks packaging script
           the Python you use to run this setup :
@@ -51,17 +49,11 @@ usage="usage: python %prog [options] [install|test] [arg]\n" + \
             prefix         : %(prefix)s
 
    arguments :
-     action : only 'install' or 'test'.
-
-     By default all products are installed, but you can install only one (if a
-     first attempt failed). Example : python setup.py install aster.
-
-     Available products (the order is important) :
-       %(prod)s.""") % {
+     action : only 'clean'.
+     """) % {
       'vers' : python_version,
       'prefix' : os.path.abspath(sys.prefix),
       'interp' : sys.executable,
-      'prod' : ', '.join(to_install),
    }
 
 
@@ -76,7 +68,7 @@ def command_func(command):
 	# print("===========================================================================")
 
 def exec_commands(commands,name):
-	print(">>>>>>>>>>>>> Updating "+name+".... <<<<<<<<<<<<<")
+	print("\n>>>>>>>>>>>>> Updating "+name+".... <<<<<<<<<<<<<")
 	print("===============================================================================================")
 
 	for c in commands:
@@ -92,7 +84,7 @@ def extract(path,file):
 def compress(path,folder):
 
 	return "cd "+path+"/;tar cfJ "+folder \
-		+"1.tar.xz "+folder+";rm -r "+folder+"/"
+		+".tar.xz "+folder+";rm -r "+folder+"/"
 
 def update_mumps(file,path):
 	commands=[]
@@ -103,15 +95,6 @@ def update_mumps(file,path):
 	commands.append("cp -r Make "+uncompressed)
 	commands.append(compress(path,name_folder[0]))
 	exec_commands(commands,"MUMPS")
-	# shutil.unpack_archive(os.path.join(path,file),extract_dir=path)
-	# print("\tExtracting MUMPS....")
-	# print(os.path.join(path,file))
-	# command_func("tar -C "+path+" -xf "+os.path.join(path,file))
-	# name_folder=file.split(".tar")
-	# uncompressed=path+"/"+name_folder[0]+"/"
-	# command_func("cp -r Make "+uncompressed)
-	# command_func("cd "+path+"/;tar cfJ "+name_folder[0]
-	# 	+"1.tar.xz "+name_folder[0]+";rm -r "+name_folder[0]+"/")
 
 
 def update_benchfiles(file,path):
@@ -121,17 +104,18 @@ def update_benchfiles(file,path):
 	uncompressed=path+"/"+name_folder[0]+"/"
 	commands.append("cp -r Make "+uncompressed)
 	mat_folder=" Matrices/"
-	matrices=["","aster_matrix_input","determinant_test","*.mtx"]
+	# matrices=["","aster_matrix_input","*.mtx"]
+	matrices=["","aster_matrix_input","fidap011*","e40r5000*","e40r0000*"]
 	command_matrix="cp "+mat_folder.join( matrices)
 	command_matrix+=" "+uncompressed
 
-	print(command_matrix)  
+	# print(command_matrix)  
 
 	source_files=["save_sparse.py","dsimpletest.F","mmio.f"]
 	command_src ="cp "+" ".join(source_files)
 	command_src+=" "+uncompressed
 
-	print(command_src)
+	# print(command_src)
 
 	commands.append(command_matrix)
 	commands.append(command_src)
@@ -141,17 +125,20 @@ def update_benchfiles(file,path):
 	exec_commands(commands,"Benchmark MUMPS")
 
 
-
-
-	
-
-
-
 parser.add_option("--MUMPS", dest="mumps",action="store_true",default=False,
-    help="Update MUMPS FILE[default value False]")
+    help="Update MUMPS Make directory  		[default value False]")
 
 parser.add_option("--BenchFiles", dest="BenchFiles",action="store_true",default=False,
-    help="Update MUMPS Benchmarks FILE[default value False]")
+    help="Update MUMPS Benchmarks FILE 		[default value False]")
+
+parser.add_option("--CPY", dest="cpy",action="store_true",default=False,
+    help="copy package to DEST directory		[default value False]")
+
+parser.add_option("--dest", dest="dest",action="store",
+	default="/mnt/.tgvdv2/projets/projets.002/ccnhpc.066/Benchmarks",
+    help="copy destination for package		[default value '/mnt/.tgvdv2/projets/projets.002/ccnhpc.066/Benchmarks']")
+
+
 
 
 version = {
@@ -163,7 +150,7 @@ if __name__ == '__main__':
 	main_folder="mumps-benchmark-full-src-0.0.1/"
 	opts, args = parser.parse_args()
 	print("Starting Packaging....")
-	tar_ext="tar.xz"
+	tar_ext=".tar.xz"
 
 	if len(args) > 0:
 		if args[0] == 'clean':
@@ -174,7 +161,7 @@ if __name__ == '__main__':
 			
 
 			command_func("cd "+main_folder+";"+"python setup.py clean")
-			command_func("rm -r "+main_folder+"public")
+			command_func("rm -r "+main_folder+"public "+main_folder+"bin/")
 
 			print("===============================================================================================")
 			
@@ -184,8 +171,20 @@ if __name__ == '__main__':
 
 	if opts.mumps:
 		file_mumps="mumps-"+version["mumps"]
-		update_mumps(file_mumps+"."+tar_ext,main_folder+"SRC")
+		update_mumps(file_mumps+tar_ext,main_folder+"SRC")
 
 	if opts.BenchFiles:
 		file_bench="mumps_benchmark-"+version['mumps_benchmark']
 		update_benchfiles(file_bench+"."+tar_ext,main_folder+"SRC")
+
+	create_package="tar cfJ "+main_folder.replace("/","") \
+	+tar_ext+" "+main_folder
+	exec_commands([create_package],"Package")
+
+	if opts.cpy:
+		dest=opts.dest
+		print("------------------------------------------------------------")
+		command_func("mv "+main_folder.replace("/","") \
+			+tar_ext+" "+dest)
+		print("------------------------------------------------------------")
+
