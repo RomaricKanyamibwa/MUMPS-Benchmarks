@@ -464,7 +464,7 @@ def setup_mumps(dep, summary, **kargs):
             'dtrans'    : bench_cfg,
          }),
          ('Make'     , {
-            'command' : 'make -j 8 alllib',
+            'command' : 'make -j 4 alllib',
             'capturestderr' : False,
          }),
          ('Install',   {
@@ -526,7 +526,7 @@ def setup_mumps_benchmark(dep, summary, **kargs):
             'dtrans'    : bench_cfg,
          }),
          ('Install',   {
-            'command' : 'cp aster_matrix_input dsimpletest.F *.f '
+            'command' : 'cp -r Matrices/ dsimpletest.F *.f '
             'save_sparse.py Makefile %(dest)s/'
             %{'dest':cfg['HOME_MUMPS_BENCH']} ,
             # 'capturestderr' : False,
