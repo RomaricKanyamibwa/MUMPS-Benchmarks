@@ -185,7 +185,6 @@ C       Reading Harwell-Boeing Exchange Format
 
           READ(8,*) mumps_par%N
           READ(8,*) mumps_par%NNZ
-          print*,"N=",mumps_par%N," NNZ=",mumps_par%NNZ
           ALLOCATE( mumps_par%IRN ( mumps_par%NNZ ) )
           ALLOCATE( mumps_par%JCN ( mumps_par%NNZ ) )
           ALLOCATE( mumps_par%A( mumps_par%NNZ ) )
@@ -207,8 +206,9 @@ C       Reading Harwell-Boeing Exchange Format
         
         CLOSE(8) 
         END IF
+        print*,"N=",mumps_par%N
+        print*,"NNZ=",mumps_par%NNZ
         
-
       END IF
 
 C       print*,"-----     End  of problem definition      -----"

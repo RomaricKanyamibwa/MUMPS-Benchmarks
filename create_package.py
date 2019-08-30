@@ -102,8 +102,9 @@ def update_benchfiles(file,path):
 	commands.append(extract(path,file))
 	name_folder=file.split(".tar")
 	uncompressed=path+"/"+name_folder[0]+"/"
-	commands.append("cp -r Make/ "+uncompressed)
-	mat_folder=" Matrices/"
+	commands.append("mkdir -p "+uncompressed)
+	commands.append("cp -r Make "+uncompressed)
+	mat_folder="Matrices"
 	# matrices=["","aster_matrix_input","*.mtx"]
 	matrices=["","aster_matrix_input","fidap011*","e40r5000*","e40r0000*"]
 	command_matrix="cp -r "+mat_folder#+mat_folder.join( matrices)

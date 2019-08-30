@@ -464,7 +464,7 @@ def setup_mumps(dep, summary, **kargs):
             'dtrans'    : bench_cfg,
          }),
          ('Make'     , {
-            'command' : 'make -j 4 alllib',
+            'command' : 'make alllib',
             'capturestderr' : False,
          }),
          ('Install',   {
